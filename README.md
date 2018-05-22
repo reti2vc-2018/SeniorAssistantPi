@@ -2,8 +2,8 @@
 
 ## Membri del gruppo
 
-Giacomo Bertolazzi, 20015159@studenti.uniupo.it, Berack96
-Giulia Vago, 20015091@studenti.uniupo.it, Giuliavago
+<p> Giacomo Bertolazzi, 20015159@studenti.uniupo.it, Berack96 </p>
+<p> Giulia Vago, 20015091@studenti.uniupo.it, Giuliavago </p>
 Dawit Gulino, 20013954@studenti.uniupo.it, DawitG96
 Stefano Fioretti, 20013886@studenti.uniupo.it, f19stefano96
 
