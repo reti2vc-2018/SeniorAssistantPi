@@ -1,20 +1,28 @@
 package device;
 
 import java.util.Map;
-import manage.rest;
+import manage.Rest;
 
-public class hue {
-    String baseURL = "192.168.0.2";
-    String username = "admin";
-    String lightsURL = baseURL+"/api/"+username+"/lights/";
+public class Hue {
+    //private String baseURL;// = "192.168.0.2";
+    //private String username;// = "admin";
+    private String lightsURL;// = baseURL+"/api/"+username+"/lights/";
 
-    Map<String, ?> allLights = rest.get(lightsURL);
+    private Map<String, ?> allLights;
+
+    public Hue () {
+        this("192.168.0.2/api/admin/lights/");
+    }
+    public Hue (String url) {
+        lightsURL = url;
+        allLights = Rest.get(lightsURL);
+    }
 
     public void turnOn() {
         for (String light : allLights.keySet()) {
             String callURL = lightsURL + light + "/state";
             String body = "{ \"on\" : true }";
-            rest.put(callURL, body, "application/json");
+            Rest.put(callURL, body, "application/json");
         }
     }
 
@@ -22,7 +30,7 @@ public class hue {
         for (String light : allLights.keySet()) {
             String callURL = lightsURL + light + "/state";
             String body = "{ \"on\" : false }";
-            rest.put(callURL, body, "application/json");
+            Rest.put(callURL, body, "application/json");
         }
     }
 
@@ -30,7 +38,7 @@ public class hue {
         for (String light : allLights.keySet()) {
             String callURL = lightsURL + light + "/state";
             String body = "{ \"bri\" : "+num+" }";
-            rest.put(callURL, body, "application/json");
+            Rest.put(callURL, body, "application/json");
         }
     }
 
@@ -38,7 +46,7 @@ public class hue {
         for (String light : allLights.keySet()) {
             String callURL = lightsURL + light + "/state";
             String body = "{ \""+attribute+"\" : "+value+" }";
-            rest.put(callURL, body, "application/json");
+            Rest.put(callURL, body, "application/json");
         }
     }
 

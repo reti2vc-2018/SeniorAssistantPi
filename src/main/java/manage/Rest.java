@@ -19,7 +19,7 @@ import org.apache.http.util.EntityUtils;
  * @author <a href="mailto:luigi.derussis@uniupo.it">Luigi De Russis</a>
  * @version 1.0 (18/05/2017)
  */
-public class rest {
+public class Rest {
 
     // init gson
     private static final Gson gson = new Gson();
