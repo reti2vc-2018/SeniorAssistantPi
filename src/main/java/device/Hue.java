@@ -1,21 +1,32 @@
 package device;
 
 import java.util.Map;
+import java.util.Set;
+
 import manage.Rest;
 
 public class Hue {
-    //private String baseURL;// = "192.168.0.2";
-    //private String username;// = "admin";
+    //private String baseURL = "192.168.0.2";
+    //private String username = "C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx";
     private String lightsURL;// = baseURL+"/api/"+username+"/lights/";
 
     private Map<String, ?> allLights;
 
     public Hue () {
-        this("192.168.0.2/api/admin/lights/");
+        this("http://172.30.1.138/api/C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx/lights/");
     }
     public Hue (String url) {
         lightsURL = url;
         allLights = Rest.get(lightsURL);
+    }
+
+    public Set<String> getNameLights() {
+        return allLights.keySet();
+    }
+
+    public void removeLights(Set<String> toRemove) {
+        for(String string : toRemove)
+            allLights.remove(string);
     }
 
     public void turnOn() {
