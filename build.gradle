@@ -21,5 +21,16 @@ dependencies {
     compile 'com.google.api-client:google-api-client:1.23.0'
     compile group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: '1.11.0-beta'
 
-
+    // z-way-lib and all its dependencies (from https://github.com/pathec/ZWay-library-for-Java)
+    compile files('lib/zway-lib-0.2.9-SNAPSHOT.jar')
+    compile 'com.google.code.gson:gson:2.4'
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'org.eclipse.jetty:jetty-client:9.3.11.v20160721'
+    compile 'org.eclipse.jetty:jetty-http:9.3.11.v20160721'
+    compile 'org.eclipse.jetty:jetty-io:9.3.11.v20160721'
+    compile 'org.eclipse.jetty:jetty-util:9.3.11.v20160721'
+    compile 'org.eclipse.jetty.websocket:websocket-api:9.3.12.v20160915'
+    compile 'org.eclipse.jetty.websocket:websocket-client:9.3.12.v20160915'
+    compile 'org.eclipse.jetty.websocket:websocket-common:9.3.12.v20160915'
+    compile 'org.slf4j:slf4j-simple:1.7.21'
 }
