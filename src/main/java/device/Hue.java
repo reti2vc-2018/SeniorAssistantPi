@@ -53,10 +53,18 @@ public class Hue {
         }
     }
 
-    public void setAttribute(String attribute, String value){
+    /*public void setAttribute(String attribute, String value){
         for (String light : allLights.keySet()) {
             String callURL = lightsURL + light + "/state";
-            String body = "{ \""+attribute+"\" : "+value+" }";
+            String body = "{ \"+attribute+\" : "+value+" }";
+            Rest.put(callURL, body, "application/json");
+        }
+    }*/
+
+    public void colorLoop() {
+        for (String light : allLights.keySet()) {
+            String callURL = lightsURL + light + "/state";
+            String body = "{ \"on\" : true, \"effect\" : \"colorloop\" }";
             Rest.put(callURL, body, "application/json");
         }
     }
