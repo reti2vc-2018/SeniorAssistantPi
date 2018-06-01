@@ -7,7 +7,7 @@ import java.util.List;
 public class UserData {
 
     @Key
-    public List<Data> list;
+    public List<FITIBITData> list;
 /*
     @Key
     public int limit;
