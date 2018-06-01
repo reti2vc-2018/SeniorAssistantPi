@@ -14,12 +14,22 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
    // compile "com.sparkjava:spark-core:2.5.5"
-  //  compile "org.slf4j:slf4j-simple:1.7.21"
+    compile "org.slf4j:slf4j-simple:1.7.21"
     compile "com.google.code.gson:gson:2.8.0"
   //  compile "org.xerial:sqlite-jdbc:3.15.1"
     compile 'org.apache.httpcomponents:httpclient:4.5.3'
     compile 'com.google.api-client:google-api-client:1.23.0'
     compile group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: '1.11.0-beta'
+    compile files('zway-lib-0.2.8-SNAPSHOT.jar')
+
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'org.eclipse.jetty:jetty-client:9.3.11.v20160721'
+    compile 'org.eclipse.jetty:jetty-http:9.3.11.v20160721'
+    compile 'org.eclipse.jetty:jetty-io:9.3.11.v20160721'
+    compile 'org.eclipse.jetty:jetty-util:9.3.11.v20160721'
+    compile 'org.eclipse.jetty.websocket:websocket-api:9.3.12.v20160915'
+    compile 'org.eclipse.jetty.websocket:websocket-client:9.3.12.v20160915'
+    compile 'org.eclipse.jetty.websocket:websocket-common:9.3.12.v20160915'
 
 
 }

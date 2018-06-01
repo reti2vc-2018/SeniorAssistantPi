@@ -34,8 +34,8 @@ public class AuthFITBIT {
     private static FileDataStoreFactory DATA_STORE_FACTORY;
 
     /** OAuth 2 scope. */
-    private static final String SCOPE = "read";
-
+    private static final String SCOPE = "activity";
+    //private static final String SCOPE[] = new String[]{"activity","heartrate","location","sleep"};
     /** Global instance of the HTTP transport. */
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 
@@ -63,7 +63,8 @@ public class AuthFITBIT {
         // authorize
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setHost(
                 OAuth2ClientCredentials.DOMAIN).setPort(OAuth2ClientCredentials.PORT).build();
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+
+        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user" );
     }
 
     private static void run(HttpRequestFactory requestFactory) throws IOException {
@@ -74,19 +75,19 @@ public class AuthFITBIT {
         UserData data = request.execute().parseAs(UserData.class);
         if (data.list.isEmpty()) {
             System.out.println("Error in retrieve user data");
-        } /*else {
+        } else/* {
             if (data.hasMore) {
                 System.out.print("First ");
             }*/ //i don't think is necessary
        /*     System.out.println(data.list.size() + " favorite videos found:");
-            for (Data datas: data.list) {
-                System.out.println();
+            */for (FITIBITData datas: data.list) {
+                System.out.println(datas.toString());/*
                 System.out.println("-----------------------------------------------");
                 System.out.println("ID: " + datas.id);
                 System.out.println("Title: " + datas.title);
                 System.out.println("Tags: " + datas.tags);
                 System.out.println("URL: " + datas.url);
-            }
+         */   }/*
         }*/ //neither this
     }
 

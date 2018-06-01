@@ -1,5 +1,3 @@
-package tests;
-
 import device.Hue;
 import org.junit.Test;
 
