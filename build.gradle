@@ -21,7 +21,9 @@ dependencies {
     compile 'com.google.api-client:google-api-client:1.23.0'
     compile group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: '1.11.0-beta'
 
-    // z-way-lib and all its dependencies (from https://github.com/pathec/ZWay-library-for-Java)
+
+//	z-way-lib and all its dependencies (from https://github.com/pathec/ZWay-library-for-Java)
+
     compile files('lib/zway-lib-0.2.9-SNAPSHOT.jar')
 //	compile 'com.google.code.gson:gson:2.4' //already up there
     compile 'org.apache.commons:commons-lang3:3.4'
