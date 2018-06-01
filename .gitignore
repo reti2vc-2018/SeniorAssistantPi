@@ -11,7 +11,7 @@
 .mtj.tmp/
 
 # Package Files #
-*.jar
+# *.jar // need zway lib
 *.war
 *.ear
 *.zip
@@ -22,9 +22,17 @@
 hs_err_pid*
 /bin/
 
+# Mi sono rotto di intellij e gradle
+# anche se comunque per qualche ragione non funziona
+# Perche' cointiunua a darmi i file di queste due cartelle??
+.idea/
+.idea/*.xml
+.gradle/
+
 # eclipse things #
 .classpath
 .project
+.settings
 
 .gradle
 /build/
