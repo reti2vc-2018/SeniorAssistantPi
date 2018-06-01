@@ -24,8 +24,13 @@ import java.util.Arrays;
 public class AuthFITBIT {
 
     /** Directory to store user credentials. */
+    /* Throw a Warning when change permission: they said it's a google bug 'cause is meant to run in linux/unix
+     *
+     * https://stackoverflow.com/questions/30634827/warning-unable-to-change-permissions-for-everybody
+     * https://github.com/google/google-http-java-client/issues/315
+     */
     private static final java.io.File DATA_STORE_DIR =
-            new java.io.File(System.getProperty("user.home"), ".store/dailymotion_sample");
+            new java.io.File(System.getProperty("user.home"), ".store/seniorAssistant");
 
     /**
      * Global instance of the {@link DataStoreFactory}. The best practice is to make it a single
@@ -34,17 +39,20 @@ public class AuthFITBIT {
     private static FileDataStoreFactory DATA_STORE_FACTORY;
 
     /** OAuth 2 scope. */
-    private static final String SCOPE = "activity";
-    //private static final String SCOPE[] = new String[]{"activity","heartrate","location","sleep"};
+    private static final String SCOPE[] = new String[]{"activity","heartrate","location","sleep"};
     /** Global instance of the HTTP transport. */
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 
     /** Global instance of the JSON factory. */
-    static final JsonFactory JSON_FACTORY = new JacksonFactory();
+    private static final JsonFactory JSON_FACTORY = new JacksonFactory();
 
+    /* When i try to accept the request it'll send a 401 Unauthorized
+     * on internet i found that this message appears when the client put a wrong
+     * header, client_id or client_secret
+     * https://dev.fitbit.com/build/reference/web-api/oauth2/ -> ALT+F "401 Unauthorized"
+     */
     private static final String TOKEN_SERVER_URL = " https://api.fitbit.com/oauth2/token";
-    private static final String AUTHORIZATION_SERVER_URL =
-            "https://api.fitbit.com/oauth2/authorize";
+    private static final String AUTHORIZATION_SERVER_URL = "https://www.fitbit.com/oauth2/authorize";
 
     /** Authorizes the installed application to access user's protected data. */
     private static Credential authorize() throws Exception {
@@ -104,10 +112,11 @@ public class AuthFITBIT {
                         }
                     });
             run(requestFactory);
+            System.err.print("DONE");
             // Success!
             return;
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            System.err.println(e.getClass().getSimpleName()+" "+e.getMessage());
         } catch (Throwable t) {
             t.printStackTrace();
         }
