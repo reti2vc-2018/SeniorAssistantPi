@@ -26,16 +26,17 @@ public class TestLights {
         lights.turnOn();
         for(int i=256; i>=0; i--) {
             lights.setBrightness(i);
-            this.wait(50);
+            this.wait(25);
         }
 
         for(int i=0; i<256; i++) {
             lights.setBrightness(i);
-            this.wait(50);
+            this.wait(25);
         }
 
+        lights.setBrightness(150);
         lights.colorLoop();
-        this.wait(10000);   // 10 sec
+        this.wait(20000);   // 10 sec
         lights.turnOff();
     }
 
