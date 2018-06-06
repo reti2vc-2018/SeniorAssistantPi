@@ -1,28 +1,31 @@
 package manage;
 
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.BearerToken;
-import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import manage.FITBITData.*;
 
 import java.io.IOException;
 import java.util.Arrays;
 
+
 public class AuthFITBIT {
 
+    private static ObjectMapper mapper = new ObjectMapper();
     /** Directory to store user credentials. */
     /* Throw a Warning when change permission: they said it's a google bug 'cause is meant to run in linux/unix
      *
@@ -63,7 +66,7 @@ public class AuthFITBIT {
                 HTTP_TRANSPORT,
                 JSON_FACTORY,
                 new GenericUrl(TOKEN_SERVER_URL),
-                new ClientParametersAuthentication(
+                new BasicAuthentication(
                         OAuth2ClientCredentials.API_KEY, OAuth2ClientCredentials.API_SECRET),
                 OAuth2ClientCredentials.API_KEY,
                 AUTHORIZATION_SERVER_URL).setScopes(Arrays.asList(SCOPE))
@@ -72,31 +75,40 @@ public class AuthFITBIT {
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setHost(
                 OAuth2ClientCredentials.DOMAIN).setPort(OAuth2ClientCredentials.PORT).build();
 
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user" );
+        return new AuthorizationCodeInstalledApp(flow, receiver).authorize( "user" );
     }
 
     private static void run(HttpRequestFactory requestFactory) throws IOException {
-        FITBITUrl url = new FITBITUrl("https://api.fitbit.com/1/user/-/profile.json"); //modificare con token?
-        url.setFields("activity,heartrate,location,sleep");
+        FITBITUrl url = new FITBITUrl("https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json"); //modificare con token?
+//        url.setFields("activity,heartrate,location,sleep");
+        url.setFields("");
 
         HttpRequest request = requestFactory.buildGetRequest(url);
-        UserData data = request.execute().parseAs(UserData.class);
-        if (data.list.isEmpty()) {
-            System.out.println("Error in retrieve user data");
-        } else/* {
-            if (data.hasMore) {
-                System.out.print("First ");
-            }*/ //i don't think is necessary
-       /*     System.out.println(data.list.size() + " favorite videos found:");
-            */for (FITIBITData datas: data.list) {
-                System.out.println(datas.toString());/*
-                System.out.println("-----------------------------------------------");
-                System.out.println("ID: " + datas.id);
-                System.out.println("Title: " + datas.title);
-                System.out.println("Tags: " + datas.tags);
-                System.out.println("URL: " + datas.url);
-         */   }/*
-        }*/ //neither this
+        HttpResponse response = request.execute();
+
+
+       // System.out.println(response.parseAsString());
+
+
+    try {
+        GenericJson json = response.parseAs(GenericJson.class);
+
+        //  Sleep sleep = mapper.readValue(json.toString(), Sleep.class);
+        //  Location location = mapper.readValue(json.toString(), Location.class);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        HeartRate heart = mapper.readValue(json.toString(), HeartRate.class);
+        System.out.println(json.toPrettyString());
+        // Activity activity = mapper.readValue(json.toString(), Activity.class);
+
+       // System.out.println(json.toPrettyString());
+        response.disconnect();
+    }
+    catch(NullPointerException e){
+        e.printStackTrace();
+        response.disconnect();
+        }
+
+
     }
 
     public static void main(String[] args) {
@@ -115,11 +127,18 @@ public class AuthFITBIT {
             System.err.print("DONE");
             // Success!
             return;
-        } catch (IOException e) {
-            System.err.println(e.getClass().getSimpleName()+" "+e.getMessage());
-        } catch (Throwable t) {
-            t.printStackTrace();
         }
+          catch (TokenResponseException e) {
+            e.printStackTrace();
+        }
+         catch (IOException e) {
+            System.err.println(e.getClass().getSimpleName() + " " + e.getMessage());
+            e.printStackTrace();
+        }
+         catch (Exception e) {
+            e.printStackTrace();
+        }
+
         System.exit(1);
     }
 
