@@ -2,6 +2,7 @@ package manage;
 
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.BearerToken;
@@ -24,6 +25,18 @@ import java.util.Arrays;
 
 
 public class AuthFITBIT {
+
+    private final HttpRequestFactory requestFactory;
+
+    public AuthFITBIT() throws Exception {
+        DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
+        final Credential credential = authorize();
+
+        this.requestFactory = HTTP_TRANSPORT.createRequestFactory( request -> {
+            credential.initialize(request);
+            request.setParser(new JsonObjectParser(JSON_FACTORY));
+        });
+    }
 
     private static ObjectMapper mapper = new ObjectMapper();
     /** Directory to store user credentials. */
@@ -58,7 +71,7 @@ public class AuthFITBIT {
     private static final String AUTHORIZATION_SERVER_URL = "https://www.fitbit.com/oauth2/authorize";
 
     /** Authorizes the installed application to access user's protected data. */
-    private static Credential authorize() throws Exception {
+    private Credential authorize() throws Exception {
         OAuth2ClientCredentials.errorIfNotSpecified();
         // set up authorization code flow
         AuthorizationCodeFlow flow = new AuthorizationCodeFlow.Builder(BearerToken
@@ -78,68 +91,23 @@ public class AuthFITBIT {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize( "user" );
     }
 
-    private static void run(HttpRequestFactory requestFactory) throws IOException {
-        FITBITUrl url = new FITBITUrl("https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json"); //modificare con token?
+    public void run(String url) throws IOException {
+        FITBITUrl fitbitUrl = new FITBITUrl(url); //modificare con token?
 //        url.setFields("activity,heartrate,location,sleep");
-        url.setFields("");
+        fitbitUrl.setFields("");
 
-        HttpRequest request = requestFactory.buildGetRequest(url);
+        HttpRequest request = requestFactory.buildGetRequest(fitbitUrl);
         HttpResponse response = request.execute();
 
-
-       // System.out.println(response.parseAsString());
-
-
-    try {
-        GenericJson json = response.parseAs(GenericJson.class);
-
-        //  Sleep sleep = mapper.readValue(json.toString(), Sleep.class);
-        //  Location location = mapper.readValue(json.toString(), Location.class);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        HeartRate heart = mapper.readValue(json.toString(), HeartRate.class);
-        System.out.println(json.toPrettyString());
-        // Activity activity = mapper.readValue(json.toString(), Activity.class);
-
-       // System.out.println(json.toPrettyString());
-        response.disconnect();
-    }
-    catch(NullPointerException e){
-        e.printStackTrace();
-        response.disconnect();
-        }
-
-
-    }
-
-    public static void main(String[] args) {
         try {
-            DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
-            final Credential credential = authorize();
-            HttpRequestFactory requestFactory =
-                    HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
-                        @Override
-                        public void initialize(HttpRequest request) throws IOException {
-                            credential.initialize(request);
-                            request.setParser(new JsonObjectParser(JSON_FACTORY));
-                        }
-                    });
-            run(requestFactory);
-            System.err.print("DONE");
-            // Success!
-            return;
-        }
-          catch (TokenResponseException e) {
+            GenericJson json = response.parseAs(GenericJson.class);
+            HeartRate heart = mapper.readValue(json.toString(), HeartRate.class);
+            // System.out.println(json.toPrettyString());
+            System.out.println(heart.dateTime);
+            response.disconnect();
+        } catch(NullPointerException e){
             e.printStackTrace();
+            response.disconnect();
         }
-         catch (IOException e) {
-            System.err.println(e.getClass().getSimpleName() + " " + e.getMessage());
-            e.printStackTrace();
-        }
-         catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        System.exit(1);
     }
-
 }
