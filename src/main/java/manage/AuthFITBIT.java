@@ -1,13 +1,9 @@
 package manage;
 
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.http.*;
@@ -18,7 +14,6 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
-import manage.FITBITData.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -62,17 +57,11 @@ public class AuthFITBIT {
     /** Global instance of the JSON factory. */
     private static final JsonFactory JSON_FACTORY = new JacksonFactory();
 
-    /* When i try to accept the request it'll send a 401 Unauthorized
-     * on internet i found that this message appears when the client put a wrong
-     * header, client_id or client_secret
-     * https://dev.fitbit.com/build/reference/web-api/oauth2/ -> ALT+F "401 Unauthorized"
-     */
     private static final String TOKEN_SERVER_URL = " https://api.fitbit.com/oauth2/token";
     private static final String AUTHORIZATION_SERVER_URL = "https://www.fitbit.com/oauth2/authorize";
 
     /** Authorizes the installed application to access user's protected data. */
     private Credential authorize() throws Exception {
-        OAuth2ClientCredentials.errorIfNotSpecified();
         // set up authorization code flow
         AuthorizationCodeFlow flow = new AuthorizationCodeFlow.Builder(BearerToken
                 .authorizationHeaderAccessMethod(),
@@ -91,23 +80,24 @@ public class AuthFITBIT {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize( "user" );
     }
 
-    public void run(String url) throws IOException {
-        FITBITUrl fitbitUrl = new FITBITUrl(url); //modificare con token?
+    public <O> O run(String url, Class<O> classe) throws IOException {
+        FITBITUrl fitbitUrl = new FITBITUrl(url);
 //        url.setFields("activity,heartrate,location,sleep");
         fitbitUrl.setFields("");
 
         HttpRequest request = requestFactory.buildGetRequest(fitbitUrl);
         HttpResponse response = request.execute();
 
-        try {
-            GenericJson json = response.parseAs(GenericJson.class);
-            HeartRate heart = mapper.readValue(json.toString(), HeartRate.class);
-            // System.out.println(json.toPrettyString());
-            System.out.println(heart.dateTime);
-            response.disconnect();
-        } catch(NullPointerException e){
-            e.printStackTrace();
-            response.disconnect();
-        }
+        GenericJson json = response.parseAs(GenericJson.class);
+        response.disconnect();
+
+        System.out.println("--------------------");
+        System.out.println(classe.getSimpleName());
+        System.out.println(json.toPrettyString());
+
+        return mapper.readValue(json.toString(), classe);
+
+        // System.out.println(json.toPrettyString());
+
     }
 }
