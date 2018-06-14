@@ -14,16 +14,11 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
-import com.sun.xml.internal.xsom.impl.scd.Iterators;
 import manage.FITBITData.Device;
-
 
 import java.io.IOException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 public class AuthFITBIT {
@@ -57,7 +52,7 @@ public class AuthFITBIT {
     private static FileDataStoreFactory DATA_STORE_FACTORY;
 
     /** OAuth 2 scope. */
-    private static final String SCOPE[] = new String[]{"activity","heartrate","location","sleep","settings"};
+    private static final String SCOPE[] = new String[]{"activity","heartrate","sleep","settings"};
     /** Global instance of the HTTP transport. */
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 
@@ -75,7 +70,7 @@ public class AuthFITBIT {
                 HTTP_TRANSPORT,
                 JSON_FACTORY,
                 new GenericUrl(TOKEN_SERVER_URL),
-                new BasicAuthentication(
+                new BasicAuthentication (
                         OAuth2ClientCredentials.API_KEY, OAuth2ClientCredentials.API_SECRET),
                 OAuth2ClientCredentials.API_KEY,
                 AUTHORIZATION_SERVER_URL).setScopes(Arrays.asList(SCOPE))
@@ -87,34 +82,28 @@ public class AuthFITBIT {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize( "user" );
     }
 
-    public <O> O run(String url, Class<O> classe, boolean isDev) throws IOException {
+    public <O> O run(String url, Class<O> classe) throws IOException {
         FITBITUrl fitbitUrl = new FITBITUrl(url);
-//        url.setFields("activity,heartrate,location,sleep");
         fitbitUrl.setFields("");
         GenericJson json;
 
         HttpRequest request = requestFactory.buildGetRequest(fitbitUrl);
         HttpResponse response = request.execute();
+        O ret = null;
 
-        if (isDev){
+        if (classe.equals(Device.class)) {
+            List<Map<String, String>> arr = response.parseAs(List.class);
             Device dev = new Device();
-            dev.getLastSyncTime(response.parseAs(Iterators.Array<Map<String, String>>.class));
-            response.disconnect();
+            dev.getLastSyncTime(arr);
 
-            return mapper.readValue(map.toString(), classe);
+            ret = (O)dev;
         }
         else {
             json = response.parseAs(GenericJson.class);
+            ret = mapper.readValue(json.toString(), classe);
         }
+
         response.disconnect();
-
-      //  System.out.println("--------------------");
-        //System.out.println(classe.getSimpleName());
-        //System.out.println(json.toPrettyString());
-
-        return mapper.readValue(json.toString(), classe);
-
-        // System.out.println(json.toPrettyString());
-
+        return ret;
     }
 }

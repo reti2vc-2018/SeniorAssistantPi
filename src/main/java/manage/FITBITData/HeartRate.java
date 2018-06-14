@@ -3,6 +3,7 @@ package manage.FITBITData;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -17,12 +18,12 @@ public class HeartRate {
     }
 
     @JsonProperty("activities-heart-intraday")
-    public void qualcosAltro(Map<String, Map<String, String>[]> map) {
-        Map<String, String>[] data = map.get("dataset");
+    public void qualcosAltro(Map<String, Object> map) {
+        List<Map> data = (List) map.get("dataset");
 
         int sum = 0;
-        for(Map<String, String> dat: data)
-            sum += Integer.parseInt(dat.get("value"));
-        average = ((double)sum)/data.length;
+        for(Map<String, Object> dat: data)
+            sum += (int)dat.get("value");
+        average = ((double)sum)/data.size();
     }
 }
