@@ -19,14 +19,17 @@ public class Sensor {
     public String password = "raz4reti2";
 
     public IZWayApi zwayApi;
-    DeviceList allZWaveDevices;
-    DeviceList devices;
+    private DeviceList allZWaveDevices;
+    private DeviceList devices;
+    private Integer nodeId;
 
     public Sensor() {
         this(null);
     }
 
     public Sensor (Integer nodeId) {
+        this.nodeId = nodeId;
+
         // create an instance of the Z-Way library; all the params are mandatory (we are not going to use the remote service/id)
         zwayApi = new ZWayApiHttp(ipAddress, 8083, "http", username, password, 0, false, new ZWaySimpleCallback());
 
@@ -53,10 +56,11 @@ public class Sensor {
         return -99;
     }
 
-    synchronized public void update(int nodeId) throws InterruptedException {
+    synchronized public void update(int timeout) throws InterruptedException {
+        //setInitialValues();
         for (Device device : devices.getAllDevices())
             device.update();
-        wait(10000);
+        wait(timeout);
     }
     /*public boolean IsLowLuminescence(int Luminescence) {
                 if (dev.getProbeType().equalsIgnoreCase("Luminescence"))

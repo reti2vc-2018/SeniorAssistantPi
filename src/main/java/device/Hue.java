@@ -37,6 +37,9 @@ public class Hue {
         }
     }
 
+    public int getCurrentLuminiscence() {
+        return 0;
+    }
     public void turnOff() {
         for (String light : allLights.keySet()) {
             String callURL = lightsURL + light + "/state";
