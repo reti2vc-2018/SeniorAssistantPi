@@ -82,28 +82,36 @@ public class AuthFITBIT {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize( "user" );
     }
 
-    public <O> O run(String url, Class<O> classe) throws IOException {
+    public <O> O run(String url, Class<O> returnClass) throws IOException {
+        return run(url, returnClass, false);
+    }
+
+    public <O> O run(String url, Class<O> returnClass, boolean useAsParse) throws IOException {
         FITBITUrl fitbitUrl = new FITBITUrl(url);
         fitbitUrl.setFields("");
-        GenericJson json;
 
         HttpRequest request = requestFactory.buildGetRequest(fitbitUrl);
         HttpResponse response = request.execute();
-        O ret = null;
 
-        if (classe.equals(Device.class)) {
-            List<Map<String, String>> arr = response.parseAs(List.class);
-            Device dev = new Device();
-            dev.getLastSyncTime(arr);
+        /*
+        GenericJson json = response.parseAs(GenericJson.class);
+        response.disconnect();
 
-            ret = (O)dev;
-        }
-        else {
-            json = response.parseAs(GenericJson.class);
-            ret = mapper.readValue(json.toString(), classe);
-        }
+        System.out.println(returnClass.getSimpleName());
+        System.out.println(url);
+        System.out.println(json.toPrettyString());
+
+        return mapper.readValue(json.toString(), returnClass);
+        */
+
+        /**/
+        O ret = ( useAsParse ?
+                response.parseAs(returnClass) :
+                mapper.readValue(response.parseAs(GenericJson.class).toString(), returnClass)
+            );
 
         response.disconnect();
         return ret;
+        /**/
     }
 }
