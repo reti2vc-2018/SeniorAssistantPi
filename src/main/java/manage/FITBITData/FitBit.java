@@ -1,11 +1,11 @@
 package manage.FITBITData;
 
-import manage.AuthFITBIT;
-
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+
+import manage.AuthFITBIT;
 
 public class FitBit {
 
@@ -14,7 +14,7 @@ public class FitBit {
     private static final long MINUTE = 60000; /* 5 minutes in millisec */
 
     private final AuthFITBIT auth;
-    private final Map<Class, Long> latestRequest = new HashMap<>();
+    private final Map<Class<?>, Long> latestRequest = new HashMap<>();
     private final Calendar calendar = Calendar.getInstance();
 
     private HeartRate heart = null;
@@ -32,15 +32,14 @@ public class FitBit {
     }
 
     /* passi */
-    //https://api.fitbit.com/1/user/-/activities/steps/date/today.json
     public int getSteps() throws IOException {
         if(shouldUpdateFor(Steps.class)) {
             long currentMillisec = System.currentTimeMillis();
-
-            steps = auth.run(BASIC_URL + "1" + USER + "activities/steps/date/today.json", Steps.class);
-            latestRequest.put(steps.getClass(), currentMillisec);
+            
+            steps = auth.run(BASIC_URL + "1" + USER + "activities/steps/date/today/1w.json", Steps.class);
+        	latestRequest.put(steps.getClass(), currentMillisec);
         }
-        return 0;
+        return steps.getSteps();
     }
 
     /* battito */
@@ -71,7 +70,7 @@ public class FitBit {
         return sleep.getMinutesAsleep();
     }
 
-    private boolean shouldUpdateFor(Class type) {
+    private boolean shouldUpdateFor(Class<?> type) {
         try {
             long current = System.currentTimeMillis();
             long latest = latestRequest.get(type);

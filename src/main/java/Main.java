@@ -1,5 +1,4 @@
-import manage.AuthFITBIT;
-import manage.FITBITData.*;
+import manage.FITBITData.FitBit;
 
 public class Main {
     public static void main(String[] args) throws Exception {
