@@ -12,31 +12,62 @@ public class Sensor {
     Logger logger = LoggerFactory.getLogger(Sensor.class);
 
     // sample RaZberry IP address
-    String ipAddress = "http://172.30.1.137:8083";
+    public String ipAddress = "172.30.1.137";
 
     // sample username and password
-    String username = "admin";
-    String password = "raz4reti2";
+    public String username = "admin";
+    public String password = "raz4reti2";
 
-    IZWayApi zwayApi;
+    public IZWayApi zwayApi;
+    private DeviceList allZWaveDevices;
+    private DeviceList devices;
+    private Integer nodeId;
 
     public Sensor() {
-        // create an instance of the Z-Way library; all the params are mandatory (we are not going to use the remote service/id)
-        zwayApi = new ZWayApiHttp(ipAddress, 8083, "http", username, password, 0, false, new ZWaySimpleCallback());
+        this(null);
     }
 
-    // get all the Z-Wave devices
-    DeviceList allDevices = zwayApi.getDevices();
+    public Sensor (Integer nodeId) {
+        this.nodeId = nodeId;
 
-    public boolean IsLowLuminescence(int Luminescence) {
-        for (Device dev : allDevices.getAllDevices()) {
-            if (dev.getDeviceType().equalsIgnoreCase("SensorMultilevel"))
-                if (dev.getProbeType().equalsIgnoreCase("luminescence"))
+        // create an instance of the Z-Way library; all the params are mandatory (we are not going to use the remote service/id)
+        zwayApi = new ZWayApiHttp(ipAddress, 8083, "http", username, password, 0, false, new ZWaySimpleCallback());
+
+        // get all the Z-Wave devices
+        allZWaveDevices = zwayApi.getDevices();
+
+        if(nodeId != null)
+            useNode(nodeId);
+        else
+            devices = allZWaveDevices;
+    }
+
+    public void useNode(int nodeId) {
+        devices = new DeviceList();
+        for (Device devi : allZWaveDevices.getAllDevices())
+            if(devi.getNodeId() == nodeId)
+                devices.addDevice(devi);
+    }
+
+    public int luminiscenceLevel() {
+        for (Device device : devices.getAllDevices())
+        if (device.getMetrics().getProbeTitle().equalsIgnoreCase("luminiscence"))
+            return Integer.parseInt(device.getMetrics().getLevel());
+        return -99;
+    }
+
+    synchronized public void update(int timeout) throws InterruptedException {
+        //setInitialValues();
+        for (Device device : devices.getAllDevices())
+            device.update();
+        wait(timeout);
+    }
+    /*public boolean IsLowLuminescence(int Luminescence) {
+                if (dev.getProbeType().equalsIgnoreCase("Luminescence"))
                     if (Integer.parseInt(dev.getMetrics().getLevel()) < Luminescence)
                         return true;
                     else
                         return false;
-        }
-        return false;
-    }
+                    return false;
+    }*/
 }
