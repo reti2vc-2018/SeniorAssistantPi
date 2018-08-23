@@ -1,4 +1,4 @@
-package manage.FITBITData;
+package device.FITBITData;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

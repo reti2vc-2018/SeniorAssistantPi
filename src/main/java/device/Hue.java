@@ -3,7 +3,7 @@ package device;
 import java.util.Map;
 import java.util.Set;
 
-import manage.Rest;
+import support.Rest;
 
 public class Hue {
     //private String baseURL = "192.168.0.2";

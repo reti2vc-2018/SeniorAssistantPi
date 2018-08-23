@@ -4,6 +4,8 @@ import de.fh_zwickau.informatik.sensor.IZWayApi;
 import de.fh_zwickau.informatik.sensor.ZWayApiHttp;
 import de.fh_zwickau.informatik.sensor.model.devices.Device;
 import de.fh_zwickau.informatik.sensor.model.devices.DeviceList;
+import support.ZWaySimpleCallback;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,15 +23,12 @@ public class Sensor {
     public IZWayApi zwayApi;
     private DeviceList allZWaveDevices;
     private DeviceList devices;
-    private Integer nodeId;
 
     public Sensor() {
         this(null);
     }
 
     public Sensor (Integer nodeId) {
-        this.nodeId = nodeId;
-
         // create an instance of the Z-Way library; all the params are mandatory (we are not going to use the remote service/id)
         zwayApi = new ZWayApiHttp(ipAddress, 8083, "http", username, password, 0, false, new ZWaySimpleCallback());
 

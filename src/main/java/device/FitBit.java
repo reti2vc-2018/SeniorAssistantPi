@@ -1,11 +1,14 @@
-package manage.FITBITData;
+package device;
 
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import manage.AuthFITBIT;
+import device.FITBITData.HeartRate;
+import device.FITBITData.Sleep;
+import device.FITBITData.Steps;
+import oauth.AuthFITBIT;
 
 public class FitBit {
 
