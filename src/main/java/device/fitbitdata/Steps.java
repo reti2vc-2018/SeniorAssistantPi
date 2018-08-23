@@ -1,4 +1,4 @@
-package device.FITBITData;
+package device.fitbitdata;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,7 +20,7 @@ public class Steps {
 	    
 		for(Map<String, String> map : array)
 			if(map.get("dateTime").equals(strDate))
-				steps = Integer.parseInt(map.get("value"))+1;
+				steps = Integer.parseInt(map.get("value"));
 	}
 	
 	public int getSteps() {

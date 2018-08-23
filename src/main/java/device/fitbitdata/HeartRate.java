@@ -1,4 +1,4 @@
-package device.FITBITData;
+package device.fitbitdata;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

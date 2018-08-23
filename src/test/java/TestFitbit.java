@@ -1,12 +1,12 @@
 import org.junit.Test;
 
-import device.FitBit;
+import device.Fitbit;
 
 public class TestFitbit {
 	
 	@Test
 	public void test01() throws Exception {
-		FitBit fitBit = new FitBit();
+		Fitbit fitBit = new Fitbit();
         fitBit.getHoursSleep();
 
         System.out.println("Today's average heart-rate: "+fitBit.getHeartRate());

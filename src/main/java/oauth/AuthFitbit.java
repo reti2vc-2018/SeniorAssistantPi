@@ -24,11 +24,11 @@ import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 
 
-public class AuthFITBIT {
+public class AuthFitbit {
 
     private final HttpRequestFactory requestFactory;
 
-    public AuthFITBIT() throws Exception {
+    public AuthFitbit() throws Exception {
         DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
         final Credential credential = authorize();
 

@@ -9,8 +9,14 @@ import support.ZWaySimpleCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Sensore che permette di registrare vari dati dell'ambiente
+ */
 public class Sensor {
-    // init logger
+	
+	/**
+	 * Logger?
+	 */
     Logger logger = LoggerFactory.getLogger(Sensor.class);
 
     // sample RaZberry IP address
@@ -24,6 +30,9 @@ public class Sensor {
     private DeviceList allZWaveDevices;
     private DeviceList devices;
 
+    /**
+     * Crea un sensore contenente tutti i nodi
+     */
     public Sensor() {
         this(null);
     }

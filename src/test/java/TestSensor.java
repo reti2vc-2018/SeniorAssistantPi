@@ -29,7 +29,7 @@ import java.util.Set;
 
         while(i<999999) {
             if (sensor.luminiscenceLevel() < 200) {
-                lights.getCurrentLuminiscence();
+                lights.getCurrentBrightness();
                 lights.setBrightness(200);
             }
 
