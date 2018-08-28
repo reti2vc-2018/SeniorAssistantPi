@@ -57,7 +57,7 @@ public class Sensor {
                 devices.addDevice(devi);
     }
 
-    public int luminiscenceLevel() {
+    public int getBrightnessLevel() {
         for (Device device : devices.getAllDevices())
         if (device.getMetrics().getProbeTitle().equalsIgnoreCase("luminiscence"))
             return Integer.parseInt(device.getMetrics().getLevel());

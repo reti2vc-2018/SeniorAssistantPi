@@ -9,6 +9,7 @@ import support.Rest;
  * Classe che permette di controllare le luci Philips Hue
  */
 public class Hue {
+    public static final int MAX_BRIGHTNESS = 255;
     //private String baseURL = "192.168.0.2";
     //private String username = "C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx";
 	/**
@@ -20,6 +21,8 @@ public class Hue {
      * Tutte le luci che sono state registrate dall'url
      */
     private Map<String, ?> allLights;
+
+    private int brightness = 0;
 
     public Hue () {
         this("http://172.30.1.138/api/C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx/lights/");
@@ -33,6 +36,7 @@ public class Hue {
     public Hue (String url) {
         lightsURL = url;
         allLights = Rest.get(lightsURL);
+        // Todo brightness initial
     }
 
     /**
@@ -81,7 +85,7 @@ public class Hue {
      * @return
      */
     public int getCurrentBrightness() {
-        return 0;
+        return brightness;
     }
     
     /**
@@ -96,6 +100,45 @@ public class Hue {
             String body = "{ \"bri\" : "+num+" }";
             Rest.put(callURL, body, "application/json");
         }
+        brightness = num;
+    }
+
+    /**
+     * Dinuisce la luminosita' delle luci controllate della percentuale che viene passata
+     * @param percentage la percentuale di diminuzione
+     */
+    public void increaseBrightness(int percentage) {
+        if (percentage<0)
+            percentage = 0;
+        else if (percentage>100)
+            percentage = 100;
+        setBrightness(brightness + (percentage*MAX_BRIGHTNESS)/100);
+    }
+
+    /**
+     * Aumenta la luminosita' delle luci controllate del 10%
+     */
+    public void increaseBrightness() {
+        increaseBrightness(10);
+    }
+
+    /**
+     * Dinuisce la luminosita' delle luci controllate della percentuale che viene passata
+     * @param percentage la percentuale di diminuzione
+     */
+    public void decreaseBrightness(int percentage) {
+        if (percentage<0)
+            percentage = 0;
+        else if (percentage>100)
+            percentage = 100;
+        setBrightness(brightness - (percentage*MAX_BRIGHTNESS)/100);
+    }
+
+    /**
+     * Dinuisce la luminosita' delle luci controllate del 10%
+     */
+    public void decreaseBrightness() {
+        decreaseBrightness(10);
     }
 
     /**

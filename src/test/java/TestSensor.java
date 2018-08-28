@@ -12,7 +12,7 @@ import java.util.Set;
     @Test
      synchronized public void firstTestSensor() throws InterruptedException {
         sensor.update(2);
-        System.out.println(sensor.luminiscenceLevel());
+        System.out.println(sensor.getBrightnessLevel());
     }
 
     @Test
@@ -28,15 +28,15 @@ import java.util.Set;
         lights.turnOn();
 
         while(i<999999) {
-            if (sensor.luminiscenceLevel() < 200) {
+            if (sensor.getBrightnessLevel() < 200) {
                 lights.getCurrentBrightness();
                 lights.setBrightness(200);
             }
 
-            if (sensor.luminiscenceLevel() > 600) {
+            if (sensor.getBrightnessLevel() > 600) {
                 lights.setBrightness(0);
             }
-            System.out.println(i+"-"+sensor.luminiscenceLevel());
+            System.out.println(i+"-"+sensor.getBrightnessLevel());
             sensor.update(100);
             i++;
         }

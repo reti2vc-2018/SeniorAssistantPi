@@ -1,6 +1,6 @@
-import org.junit.Test;
 
 import device.Fitbit;
+import org.junit.Test;
 
 public class TestFitbit {
 	
