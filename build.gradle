@@ -15,9 +15,9 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-//	compile "com.sparkjava:spark-core:2.5.5"
-    compile "com.google.code.gson:gson:2.8.0"
-//	compile "org.xerial:sqlite-jdbc:3.15.1"
+	compile "com.sparkjava:spark-core:2.7.2"
+    compile "com.google.code.gson:gson:2.8.4"
+//	compile "org.xerial:sqlite-jdbc:3.21.0.1" //todo remove commenting because "You need to install an appropriate JDBC (Java Database Connectivity) driver to run your Java database programs."
     compile 'org.apache.httpcomponents:httpclient:4.5.3'
     compile 'com.google.api-client:google-api-client:1.23.0'
     compile group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: '1.11.0-beta'
@@ -27,18 +27,20 @@ dependencies {
     compile files('lib/zway-lib-0.2.9-SNAPSHOT.jar')
 
     compile 'org.apache.commons:commons-lang3:3.4'
-    compile 'org.eclipse.jetty:jetty-client:9.3.11.v20160721'
-    compile 'org.eclipse.jetty:jetty-http:9.3.11.v20160721'
-    compile 'org.eclipse.jetty:jetty-io:9.3.11.v20160721'
-    compile 'org.eclipse.jetty:jetty-util:9.3.11.v20160721'
-    compile 'org.eclipse.jetty.websocket:websocket-api:9.3.12.v20160915'
-    compile 'org.eclipse.jetty.websocket:websocket-client:9.3.12.v20160915'
-    compile 'org.eclipse.jetty.websocket:websocket-common:9.3.12.v20160915'
+    compile 'org.eclipse.jetty:jetty-client:9.4.11.v20180605'
+    compile 'org.eclipse.jetty:jetty-http:9.4.11.v20180605'
+    compile 'org.eclipse.jetty:jetty-io:9.4.11.v20180605'
+    compile 'org.eclipse.jetty:jetty-util:9.4.11.v20180605'
+    compile 'org.eclipse.jetty.websocket:websocket-api:9.4.11.v20180605'
+    compile 'org.eclipse.jetty.websocket:websocket-client:9.4.11.v20180605'
+    compile 'org.eclipse.jetty.websocket:websocket-common:9.4.11.v20180605'
     compile 'org.slf4j:slf4j-simple:1.7.21'
 
 	//DialogFlow
-//	compile "ai.api:libai:1.6.12"
+	compile "ai.api:libai:1.6.12"
+//  compile 'com.google.cloud:google-cloud-dialogflow:0.59.0-alpha' // for the v2 of dialogflow
 	
     //for objectMapper
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.5'
+    implementation 'junit:junit:4.12'
 }

@@ -6,28 +6,41 @@ import de.fh_zwickau.informatik.sensor.model.devices.Device;
 import de.fh_zwickau.informatik.sensor.model.devices.DeviceList;
 import support.ZWaySimpleCallback;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Sensore che permette di registrare vari dati dell'ambiente
  */
 public class Sensor {
-	
-	/**
-	 * Logger?
-	 */
-    Logger logger = LoggerFactory.getLogger(Sensor.class);
 
-    // sample RaZberry IP address
-    public String ipAddress = "172.30.1.137";
+    /* todo ma serve il LOGGER?
+    private Logger logger = LoggerFactory.getLogger(Sensor.class);
+    */
 
-    // sample username and password
-    public String username = "admin";
-    public String password = "raz4reti2";
+    /**
+     * IP del sensore a cui ci si vuole agganciare
+     */
+    private static final String IP_ADDRESS = "172.30.1.137";
 
-    public IZWayApi zwayApi;
+    /**
+     * Porta in cui si ascolta per i sensori
+     */
+    private static final int PORT = 8083;
+
+    /**
+     * Username con cui si entra nel dispositivo
+     */
+    private static final String USERNAME = "admin";
+    /**
+     * Password del dispositivo
+     */
+    private final String PASSWORD = "raz4reti2";
+
+    /**
+     * Tutti i devices che esistono nella rete
+     */
     private DeviceList allZWaveDevices;
+    /**
+     * I device che vengono selezionati e filtrati dall'utente (ovvero quelli che verranno usati per prendere i dati)
+     */
     private DeviceList devices;
 
     /**
@@ -37,9 +50,13 @@ public class Sensor {
         this(null);
     }
 
+    /**
+     * Si connette ad un sensore che ha il nodeId selezioniato
+     * @param nodeId nodo che viene selezionato
+     */
     public Sensor (Integer nodeId) {
         // create an instance of the Z-Way library; all the params are mandatory (we are not going to use the remote service/id)
-        zwayApi = new ZWayApiHttp(ipAddress, 8083, "http", username, password, 0, false, new ZWaySimpleCallback());
+        IZWayApi zwayApi = new ZWayApiHttp(IP_ADDRESS, PORT, "http", USERNAME, PASSWORD, 0, false, new ZWaySimpleCallback());
 
         // get all the Z-Wave devices
         allZWaveDevices = zwayApi.getDevices();
@@ -50,6 +67,10 @@ public class Sensor {
             devices = allZWaveDevices;
     }
 
+    /**
+     * Cambia i dispositivi selezionati in base al nodeId che viene scelto
+     * @param nodeId il nodo che viene selezionato
+     */
     public void useNode(int nodeId) {
         devices = new DeviceList();
         for (Device devi : allZWaveDevices.getAllDevices())
@@ -57,6 +78,10 @@ public class Sensor {
                 devices.addDevice(devi);
     }
 
+    /**
+     * Legge i valori della luminosita' segnata dai dispositivi e ne ritorna il valore
+     * @return la luminopsita' segnata dai dispositivi
+     */
     public int getBrightnessLevel() {
         for (Device device : devices.getAllDevices())
         if (device.getMetrics().getProbeTitle().equalsIgnoreCase("luminiscence"))
@@ -64,8 +89,13 @@ public class Sensor {
         return -99;
     }
 
+    /**
+     * Fa in modo di forzare l'aggiornamento dei dispositivi
+     * @param timeout fa aspettare un tot di tempo prima di provare a forzare e dopo l'aggiornameto
+     * @throws InterruptedException nel caso che succeda qualcosa
+     */
     synchronized public void update(int timeout) throws InterruptedException {
-        //setInitialValues();
+        wait(timeout);
         for (Device device : devices.getAllDevices())
             device.update();
         wait(timeout);
