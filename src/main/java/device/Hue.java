@@ -9,6 +9,10 @@ import support.Rest;
  * Classe che permette di controllare le luci Philips Hue
  */
 public class Hue {
+
+    /**
+     * La luminopsita' massima a cui si puo' arrivare
+     */
     public static final int MAX_BRIGHTNESS = 255;
     //private String baseURL = "192.168.0.2";
     //private String username = "C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx";
@@ -22,12 +26,28 @@ public class Hue {
      */
     private Map<String, ?> allLights;
 
+    /**
+     * L'ultima luminosita' impostata
+     */
     private int brightness = 0;
 
+    /**
+     * Cerca le luci Philips Hue a ll'indirizzo <a href="http://172.30.1.138/api/C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx/lights/">http://172.30.1.138/api/C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx/lights/</a>
+     */
     public Hue () {
-        this("http://172.30.1.138/api/C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx/lights/");
+        this("172.30.1.138", "C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx");
     }
-    
+
+    //todo maybe the key is the user, but who knows?
+    /**
+     * Cerca le luci Philips Hue nell'indirizzo specificato e con la chiave specificata
+     * @param ip l'indirizzo IP
+     * @param key la chiuave utililzzata
+     */
+    public Hue(String ip, String key) {
+        this("http://" + ip + "/api/" + key + "/lights/");
+    }
+
     /**
      * Inizializza la classe cercando tutte le luci all'indirizzo url specificato
      * 
@@ -36,7 +56,7 @@ public class Hue {
     public Hue (String url) {
         lightsURL = url;
         allLights = Rest.get(lightsURL);
-        // Todo brightness initial
+        // Todo brightness initial, maybe by default 50% or 75% of the total
     }
 
     /**

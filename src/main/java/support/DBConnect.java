@@ -1,8 +1,6 @@
 package support;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 /**
  * Handle the connection to the SQLite database that stores our tasks.
@@ -12,28 +10,31 @@ import java.sql.SQLException;
 public class DBConnect {
 
     // todo add a db where we put daily (or hourly, but only for heart) updates
-    static private final String DB_LOCATION = "jdbc:sqlite:src/main/resources/tasks.db";
-    static private DBConnect instance = null;
+    public static final String DB_LOCATION = "jdbc:sqlite:src/main/resources/";
+    public static final String DB_NAME = "user_data.db";
 
-    private DBConnect() {
-        instance = this;
+    private static DBConnect instance;
+
+    private final Connection conn;
+
+    private DBConnect() throws SQLException {
+        conn = DriverManager.getConnection(DB_LOCATION + DB_NAME);
+        buildTablesIfNotExisting();
     }
 
     public static DBConnect getInstance() {
-        return (instance == null ? new DBConnect() : instance);
+        try {
+            instance = instance==null? new DBConnect():instance;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return instance;
     }
 
-    public Connection getConnection() throws SQLException {
-        try {
-            /* todo this might work for create the database
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/");
-            Statement s = Conn.createStatement();
-            int result = s.executeUpdate("CREATE DATABASE databasename");
-            st.close();
-            */
-            return DriverManager.getConnection(DB_LOCATION);
-        } catch (SQLException e) {
-            throw new SQLException("Cannot get connection to " + DB_LOCATION, e);
-        }
+    private void buildTablesIfNotExisting() throws SQLException {
+        Statement statement = conn.createStatement();
+        // todo working, but not quite well
+        statement.execute("CREATE TABLE IF NOT EXISTS user (user VARCHAR(16) PRIMARY KEY, name VARCHAR(16), birthday DATE);");
+        statement.execute("CREATE TABLE IF NOT EXISTS heart_rate (date DATE, rate DOUBLE, user VARCHAR(16), PRIMARY KEY(date, user));");
     }
 }
