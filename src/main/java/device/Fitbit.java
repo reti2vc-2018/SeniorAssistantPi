@@ -3,6 +3,7 @@ package device;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import device.fitbitdata.HeartRate;
@@ -74,9 +75,8 @@ public class Fitbit {
 	 * @return un intero rappresentante i passi effettuati
 	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
-	public int getSteps() throws IOException {
-		if (shouldUpdateFor(Steps.class))
-			steps = auth.run(BASIC_URL + "1" + USER + "activities/steps/date/today/1w.json", Steps.class);
+	public synchronized int getSteps() throws IOException {
+		steps = update(Steps.class, steps, "1" + USER + "activities/steps/date/today/1w.json");
 		return steps.getSteps();
 	}
 
@@ -87,9 +87,10 @@ public class Fitbit {
 	 * @return un intero rappresentante la media del battito cardiaco degli ultimi 15 minuti
 	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
-	public double getHeartRate() throws IOException {
+	public synchronized double getHeartRate() throws IOException {
 		return getHeartRate(15);
 	}
+
 	/**
 	 * Ricevi il battito cardiaco dell'utente<br>
 	 * Il risultato e' una media del battito che l'utente ha avuto negli ultimi minuti
@@ -98,22 +99,19 @@ public class Fitbit {
 	 * @return un intero rappresentante la media del battito cardiaco degli ultimi minuti specificati
 	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
-	public double getHeartRate(int lastMinutes) throws IOException {
+	public synchronized double getHeartRate(int lastMinutes) throws IOException {
 		if(lastMinutes<=0)
 			return -1;
-		if (shouldUpdateFor(HeartRate.class)) {
-			long currentMillisec = System.currentTimeMillis();
 
-			String now = getHourMinutes(currentMillisec);
-			String ago = getHourMinutes(currentMillisec - (MINUTE * lastMinutes));
+		long currentMillisec = System.currentTimeMillis();
 
-			if (now.compareTo(ago) < 0)
-				ago = "00:00";
+		String now = getHourMinutes(currentMillisec);
+		String ago = getHourMinutes(currentMillisec - (MINUTE * lastMinutes));
 
-			heart = auth.run(
-					BASIC_URL + "1" + USER + "activities/heart/date/today/1d/1sec/time/" + ago + "/" + now + ".json",
-					HeartRate.class);
-		}
+		if (now.compareTo(ago) < 0)
+			ago = "00:00";
+
+		heart = update(HeartRate.class, heart,"1" + USER + "activities/heart/date/today/1d/1sec/time/" + ago + "/" + now + ".json");
 		return heart.getAverage();
 	}
 
@@ -123,33 +121,48 @@ public class Fitbit {
 	 * @return un intero rappresentante le ore passate a dormire
 	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
-	public Object getHoursSleep() throws IOException {
-		if (shouldUpdateFor(Sleep.class))
-			sleep = auth.run(BASIC_URL + "1.2" + USER + "sleep/date/today.json", Sleep.class);
-		return sleep.getMinutesAsleep();
+	public synchronized long getHoursSleep() throws IOException {
+		sleep = update(Sleep.class, sleep,"1.2" + USER + "sleep/date/today.json");
+		return sleep.getMinutesAsleep()/60;
 	}
 
 	/**
-	 * Semplice classe che controlla che si possa fare l'update o meno di una specifica classe<br>
-	 * Se e' possibile fare l'update inserisce la classe nella mappa<br>
-	 * In questo modo se questa funzione viene chiamata una seconda volta con lo stesso parametro restituira' falso<br>
-	 * a meno che non si aspetti 5 minuti
-	 * 
-	 * @param type la classe da fare l'update
-	 * @return vero se si puo' fare l'update
+	 * Ricevi tutti i dati presenti per il sonno di questo giorno.
+	 * La lista contiene per ogni volta che l'utente ha dormito:<br>
+	 * - la data di quando si e' addormentato<br>
+	 * - la durata del sonno<br>
+	 * - la data di fine<br>
+	 * @return una lista contenente ogni volta che l'utente ha dormito
+	 * @throws IOException
 	 */
-	private boolean shouldUpdateFor(Class<?> type) {
+	public synchronized List<Sleep.SleepData> getDetailedSleep() throws IOException {
+		sleep = update(Sleep.class, sleep,"1.2" + USER + "sleep/date/today.json");
+		return sleep.getDatas();
+	}
+
+	/**
+	 * Semplice funzione che controlla che si possa fare l'update o meno di una specifica classe<br>
+	 * Se e' possibile fare l'update viene mandata una run all'url selezionato e viene ritornata la variabile aggiornata<br>
+	 * Altrimenti viene ritornata la variabile passata
+	 *
+	 * @param varClass la classe della variabile passata
+	 * @param variable la variabile che vede fare l'update
+	 * @param url l'url da cui prende i dati aggiornati
+	 * @return la variabile aggiornata
+	 */
+	private <T> T update(Class<T> varClass, T variable, String url) throws IOException {
 		try {
 			long current = System.currentTimeMillis();
-			long latest = latestRequest.get(type);
+			long latest = latestRequest.get(varClass);
 
+			// don't update
 			if(current - latest < MINUTE * 5)
-				return false;
+				return variable;
 		} catch (NullPointerException e) {
+			// do nothing and update
 		}
-		
-		latestRequest.put(heart.getClass(), System.currentTimeMillis());
-		return true;
+		latestRequest.put(varClass, System.currentTimeMillis());
+		return auth.run(BASIC_URL + url, varClass);
 	}
 
 	/**

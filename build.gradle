@@ -16,14 +16,9 @@ repositories {
 dependencies {
     // Tests
     testCompile group: 'junit', name: 'junit', version: '4.12'
-//    implementation 'junit:junit:4.12'
-
-    // GSON but works even without it anyway
-//    compile "com.google.code.gson:gson:2.8.4"
 
     // Database
     compile "org.xerial:sqlite-jdbc:3.21.0.1"
-//    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.12'
 
     // Rest request
     compile 'org.apache.httpcomponents:httpclient:4.5.6'
@@ -36,26 +31,19 @@ dependencies {
 
     // Server Spark
 	compile "com.sparkjava:spark-core:2.7.2"
-//    compile 'org.apache.commons:commons-lang3:3.4'
-//    compile group: 'org.eclipse.jetty', name: 'jetty-webapp', version: '9.4.11.v20180605'
-//    compile 'org.eclipse.jetty:jetty-client:9.4.11.v20180605'
-//    compile 'org.eclipse.jetty.websocket:websocket-server:9.4.11.v20180605'
 
     // Oauth
+//    compile group: 'org.pac4j', name: 'spark-pac4j', version: '2.3.0' //todo use this insted?
     compile ( group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: '1.23.0') {
         // don't pull in an old ancient jetty version
-        // todo it doesn't seems to work
         exclude group: 'org.mortbay.jetty', module: 'jetty'
         exclude group: 'org.mortbay.jetty', module: 'jetty-util'
         exclude group: 'org.mortbay.jetty', module: 'servlet-api'
     }
-//    compile group: 'org.mortbay.jetty', name: 'jetty', version: '7.0.0.pre5'
-//    compile group: 'org.mortbay.jetty', name: 'servlet-api', version: '3.0.20100224'
     compile 'com.google.api-client:google-api-client:1.23.0'
 
 	// DialogFlow
-	compile "ai.api:libai:1.6.12"
-//    compile 'com.google.cloud:google-cloud-dialogflow:0.59.0-alpha' // for the v2 of dialogflow
+	compile group: "ai.api", name:"libai", version:"1.6.12"
 	
     // objectMapper for fitbitdata
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.5' // maybe duplicate in google-api

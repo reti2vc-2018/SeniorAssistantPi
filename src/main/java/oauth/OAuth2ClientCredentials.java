@@ -1,5 +1,6 @@
 package oauth;
 
+// todo add docs
 public class OAuth2ClientCredentials {
 
         /** Value of the "API Key". */

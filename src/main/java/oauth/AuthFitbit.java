@@ -3,12 +3,12 @@ package oauth;
 import java.io.IOException;
 import java.util.Arrays;
 
+import ai.api.GsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.http.BasicAuthentication;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
@@ -22,9 +22,14 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
+//todo add docs
 public class AuthFitbit {
+
+    private static final Logger LOG = LoggerFactory.getLogger("Fitbit Response");
 
     private final HttpRequestFactory requestFactory;
 
@@ -114,6 +119,10 @@ public class AuthFitbit {
             );
 
         response.disconnect();
+
+        // todo remove this, it's only useful if you need to see the request
+        LOG.info(GsonFactory.getDefaultFactory().getGson().toJson(ret));
+
         return ret;
         /**/
     }

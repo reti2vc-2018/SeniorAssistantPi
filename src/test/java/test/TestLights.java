@@ -1,5 +1,6 @@
 package test;
 
+import ai.api.GsonFactory;
 import device.Hue;
 import org.junit.Test;
 
@@ -8,38 +9,49 @@ import java.util.Set;
 
 public class TestLights {
 
+    public static final int TIMEOUT = 200;
+
     @Test
     synchronized public void firstTestLights() throws InterruptedException {
-        Hue lights = new Hue();
+        Hue lights = new Hue("localhost:8090", "newdeveloper");
 
         Set<String> toRemove = new HashSet<>();
         for(String str: lights.getNameLights())
-            if(!str.equals("4"))
+            if(!(Integer.parseInt(str)%2 == 0))
                 toRemove.add(str);
         lights.removeLights(toRemove);
 
         for(int i=0; i<10; i++) {
             lights.turnOn();
-            this.wait(0b11001000);  // 200
+            this.wait(TIMEOUT);
             lights.turnOff();
-            this.wait(0b11001000);  // 200
+            this.wait(TIMEOUT);
         }
 
         lights.turnOn();
-        for(int i=256; i>=0; i--) {
+        for(int i=Hue.MAX_BRIGHTNESS; i>0; i-=10) {
             lights.setBrightness(i);
-            this.wait(25);
+            this.wait(TIMEOUT);
         }
 
-        for(int i=0; i<256; i++) {
+        for(int i=0; i<Hue.MAX_BRIGHTNESS; i+=10) {
             lights.setBrightness(i);
-            this.wait(25);
+            this.wait(TIMEOUT);
         }
 
-        lights.setBrightness(150);
-        lights.colorLoop();
-        this.wait(20000);   // 10 sec
-        lights.turnOff();
+        lights.setBrightness(Hue.MAX_BRIGHTNESS);
+        lights.colorLoop(); // todo not working in simulator
+        this.wait(TIMEOUT*10);
+
+        // change colors
+        for (int i=0; i<=360; i++) {
+            double radian = (0.0174533*i);
+            double x = Math.cos(radian);
+            double y = Math.sin(radian);
+            lights.setState("xy", GsonFactory.getDefaultFactory().getGson().toJson(new Double[]{x, y}));
+            this.wait(TIMEOUT);
+        }
+
     }
 
 }

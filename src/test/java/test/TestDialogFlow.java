@@ -10,8 +10,8 @@ public class TestDialogFlow {
     public void test01() {
         DialogFlowWebHook webHook = new DialogFlowWebHook();
 
-        webHook.addOnAction("LightsON", () -> {return "Luci accese";});
-        webHook.addOnAction("LightsOFF", () -> {return "Luci spente";});
+        webHook.addOnAction("LightsON", (param) -> {return "Luci accese";});
+        webHook.addOnAction("LightsOFF", (param) -> {return "Luci spente";});
 
         webHook.startServer();
     }

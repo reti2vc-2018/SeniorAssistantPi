@@ -4,6 +4,7 @@ import ai.api.GsonFactory;
 import ai.api.model.AIResponse;
 import ai.api.model.Fulfillment;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +79,7 @@ public class DialogFlowWebHook {
             try {
                 log.info("AZIONE: "+input.getResult().getAction());
                 Action action = actions.get(input.getResult().getAction());
-                text = action.doAction();
+                text = action.doAction(input.getResult().getParameters());
             } catch (NullPointerException e) {
                 log.info("NESSUNA AZIONE TROVATA");
                 text = ERROR;
@@ -102,8 +103,10 @@ public class DialogFlowWebHook {
         /**
          * Fai l'azione desiderata.
          * Se ritorna una stringa allora il testo viene cambiato. Se ritorna null non cambia il testo
+         *
+         * @param params a map containing all the parameters passed form the request
          * @return Una stringa che verra' usata come messaggio o null se non si vuole
          */
-	    String doAction();
+	    String doAction(Map<String, JsonElement> params);
     }
 }

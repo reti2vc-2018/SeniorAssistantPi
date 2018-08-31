@@ -3,6 +3,7 @@ package oauth;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.util.Key;
 
+// todo add docs
 public class FITBITUrl extends GenericUrl {
 
     @Key

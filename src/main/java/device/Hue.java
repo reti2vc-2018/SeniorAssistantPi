@@ -1,8 +1,10 @@
 package device;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import ai.api.GsonFactory;
 import support.Rest;
 
 /**
@@ -13,7 +15,27 @@ public class Hue {
     /**
      * La luminopsita' massima a cui si puo' arrivare
      */
-    public static final int MAX_BRIGHTNESS = 255;
+    public static final int MAX_BRIGHTNESS = 254;
+
+    /**
+     * Una mappa che ad ogni colore (in lingua ita) assegna il proprio valore in hue
+     */
+    public static final Map<String, Double[]> COLORS = new HashMap<>();
+
+    // todo set right colors
+    static {
+        COLORS.put("giallo", new Double[]{0.55, 0.45});
+        COLORS.put("rosso", new Double[]{0.7, 0.25});
+        COLORS.put("verde", new Double[]{0.15, 0.65});
+        COLORS.put("blu", new Double[]{0.0, 0.0});
+        COLORS.put("rosa", new Double[]{0.45, 0.15});
+        COLORS.put("viola", new Double[]{0.25, .1});
+        COLORS.put("azzurro", new Double[]{0.15, 0.25});
+        COLORS.put("arancione", new Double[]{0.63, 0.35});
+        //COLORS.put("nero", new Double[]{1.0, 1.0});
+        COLORS.put("bianco", new Double[]{0.35, 0.3});
+    }
+
     //private String baseURL = "192.168.0.2";
     //private String username = "C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx";
 	/**
@@ -38,14 +60,13 @@ public class Hue {
         this("172.30.1.138", "C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx");
     }
 
-    //todo maybe the key is the user, but who knows?
     /**
-     * Cerca le luci Philips Hue nell'indirizzo specificato e con la chiave specificata
+     * Cerca le luci Philips Hue nell'indirizzo specificato e con l'utente specificato
      * @param ip l'indirizzo IP
-     * @param key la chiuave utililzzata
+     * @param user l'utente
      */
-    public Hue(String ip, String key) {
-        this("http://" + ip + "/api/" + key + "/lights/");
+    public Hue(String ip, String user) {
+        this("http://" + ip + "/api/" + user + "/lights/");
     }
 
     /**
@@ -61,7 +82,7 @@ public class Hue {
 
     /**
      * Ritorna un insieme contenente tutti i nomi delle luci che si sono trovate
-     * 
+     *
      * @return l'insieme dei nomi delle luci
      */
     public Set<String> getNameLights() {
@@ -82,22 +103,14 @@ public class Hue {
      * Accende tutte le luci controllate
      */
     public void turnOn() {
-        for (String light : allLights.keySet()) {
-            String callURL = lightsURL + light + "/state";
-            String body = "{ \"on\" : true }";
-            Rest.put(callURL, body, "application/json");
-        }
+        setState("on", "true");
     }
 
     /**
      * Spegne tutte le luci controllate
      */
     public void turnOff() {
-        for (String light : allLights.keySet()) {
-            String callURL = lightsURL + light + "/state";
-            String body = "{ \"on\" : false }";
-            Rest.put(callURL, body, "application/json");
-        }
+        setState("on", "false");
     }
     
     /**
@@ -115,11 +128,7 @@ public class Hue {
     public void setBrightness(int num) {
     	if (num<0)
     		num=0;
-        for (String light : allLights.keySet()) {
-            String callURL = lightsURL + light + "/state";
-            String body = "{ \"bri\" : "+num+" }";
-            Rest.put(callURL, body, "application/json");
-        }
+    	setState("bri", String.valueOf(num));
         brightness = num;
     }
 
@@ -161,25 +170,27 @@ public class Hue {
         decreaseBrightness(10);
     }
 
+    public void changeColor(String colorName) {
+        String hueColor = GsonFactory.getDefaultFactory().getGson().toJson(COLORS.get(colorName));
+        setState("xy", hueColor);
+    }
+
     /**
      * Modifica il colore delle luci in modo da fare un bel effetto arcobaleno continuo
      */
     public void colorLoop() {
-        for (String light : allLights.keySet()) {
-            String callURL = lightsURL + light + "/state";
-            String body = "{ \"on\" : true, \"effect\" : \"colorloop\" }";
-            Rest.put(callURL, body, "application/json");
-        }
+        setState("effect", "colorloop");
     }
 
     /**
-     * Funzione generale per poter utilizzare qualunque valore, ma non funziona
+     * Funzione generale per poter utilizzare qualunque valore, ma non funziona<br>
+     * Da testare, visto che mi sembra strano che non funzi...
+     * e invece funziona.
      */
-    /*public void setAttribute(String attribute, String value){
-        for (String light : allLights.keySet()) {
-            String callURL = lightsURL + light + "/state";
-            String body = "{ \""+attribute+"\" : "+value+" }";
-            Rest.put(callURL, body, "application/json");
-        }
-    }*/
+    public void setState(String attribute, String value){
+        for (String light : allLights.keySet())
+            Rest.put(lightsURL + light + "/state",
+                "{ \"" + attribute + "\" : " + value + " }",
+                "application/json");
+    }
 }
