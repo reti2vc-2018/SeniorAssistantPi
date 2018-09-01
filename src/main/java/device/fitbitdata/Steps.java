@@ -23,8 +23,6 @@ public class Steps {
 				steps = Integer.parseInt(map.get("value"));
 	}
 	
-	public int getSteps() {
-		return steps;
-	}
+	public int getSteps() { return steps; }
 
 }

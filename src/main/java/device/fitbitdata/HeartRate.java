@@ -9,17 +9,9 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HeartRate {
 
-    private String dateTime;
     private double average;
 
-    public double getAverage() {
-        return average;
-    }
-
-    @JsonProperty("activities-heart")
-    public void quelloCheVoglio(Map<String, Object>[] activities){
-        dateTime = (String) activities[0].get("dateTime");
-    }
+    public double getAverage() { return average; }
 
     @JsonProperty("activities-heart-intraday")
     public void setAverage(Map<String, Object> map) {

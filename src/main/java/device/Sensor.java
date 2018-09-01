@@ -11,10 +11,6 @@ import support.ZWaySimpleCallback;
  */
 public class Sensor {
 
-    /* todo ma serve il LOGGER?
-    private Logger logger = LoggerFactory.getLogger(Sensor.class);
-    */
-
     /**
      * IP del sensore a cui ci si vuole agganciare
      */
@@ -100,7 +96,8 @@ public class Sensor {
             device.update();
         wait(timeout);
     }
-    /*public boolean IsLowLuminescence(int Luminescence) {
+    /*
+    public boolean IsLowLuminescence(int Luminescence) {
                 if (dev.getProbeType().equalsIgnoreCase("Luminescence"))
                     if (Integer.parseInt(dev.getMetrics().getLevel()) < Luminescence)
                         return true;

@@ -20,25 +20,29 @@ public class Fitbit {
 	 * Url da dove si possono prendere i dati dai vari dispositivi fitbit
 	 */
 	public static final String BASIC_URL = "https://api.fitbit.com/";
+
 	/**
 	 * Utente del fitbit<br>
 	 * In questo caso e' universale e prende l'utente che e' attualmente loggato
 	 */
 	public static final String USER = "/user/-/";
+
 	/**
 	 * Un minuto in millisecondi
 	 */
-	private static final long MINUTE = 60000; /* 5 minutes in millisec */
+	private static final long MINUTE = 60000;
 
 	/**
 	 * L'oauth per l'account fitbit
 	 */
 	private final AuthFitbit auth;
+
 	/**
 	 * Una mappa contenente le ultime classi usate nelle richieste effettuate<br>
 	 * Una sorta di cache
 	 */
 	private final Map<Class<?>, Long> latestRequest = new HashMap<>();
+
 	/**
 	 * Un calendario in modo da sapere la data per i dati
 	 */
@@ -48,26 +52,25 @@ public class Fitbit {
 	 * La classe per sapere i dati sul battito cardiaco
 	 */
 	private HeartRate heart = null;
+
 	/**
 	 * La classe per sapere i dati sul sonno
 	 */
 	private Sleep sleep = null;
+
 	/**
 	 * La classe per sapere i dati sui passi effettuati
 	 */
 	private Steps steps = null;
 
 	/**
-	 * Crea una istanza di fitbit<br>
+	 * Crea un'istanza di fitbit<br>
 	 * Se l'utente non ha ancora accettato i dati richiesti o l'utente non e'
-	 * loggato,<br>
-	 * verra' aperto il browser in modo che si possano inserire i dati
+	 * loggato, verra' aperto il browser in modo che si possano inserire i dati
 	 * 
 	 * @throws Exception Nel caso qualunque cosa andasse storta (vedi messaggio)
 	 */
-	public Fitbit() throws Exception {
-		this.auth = new AuthFitbit();
-	}
+	public Fitbit() throws Exception { this.auth = new AuthFitbit(); }
 
 	/**
 	 * Ricevi i passi che l'utente ha effettuato nell'ultimo giorno
@@ -87,15 +90,13 @@ public class Fitbit {
 	 * @return un intero rappresentante la media del battito cardiaco degli ultimi 15 minuti
 	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
-	public synchronized double getHeartRate() throws IOException {
-		return getHeartRate(15);
-	}
+	public synchronized double getHeartRate() throws IOException { return getHeartRate(15); }
 
 	/**
 	 * Ricevi il battito cardiaco dell'utente<br>
 	 * Il risultato e' una media del battito che l'utente ha avuto negli ultimi minuti
 	 * 
-	 * @param lastMinutes fino a quanti minuti bisogna tenere conto (positivi se no ritorno -1)
+	 * @param lastMinutes fino a quanti minuti bisogna tenere conto (positivi e !=0 se no ritorno -1)
 	 * @return un intero rappresentante la media del battito cardiaco degli ultimi minuti specificati
 	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
@@ -141,7 +142,7 @@ public class Fitbit {
 	}
 
 	/**
-	 * Semplice funzione che controlla che si possa fare l'update o meno di una specifica classe<br>
+	 * Semplice funzione che controlla che si possa fare l'update o meno di una specifica classe.<br>
 	 * Se e' possibile fare l'update viene mandata una run all'url selezionato e viene ritornata la variabile aggiornata<br>
 	 * Altrimenti viene ritornata la variabile passata
 	 *
@@ -150,7 +151,7 @@ public class Fitbit {
 	 * @param url l'url da cui prende i dati aggiornati
 	 * @return la variabile aggiornata
 	 */
-	private <T> T update(Class<T> varClass, T variable, String url) throws IOException {
+	private synchronized <T> T update(Class<T> varClass, T variable, String url) throws IOException {
 		try {
 			long current = System.currentTimeMillis();
 			long latest = latestRequest.get(varClass);

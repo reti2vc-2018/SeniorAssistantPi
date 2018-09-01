@@ -29,6 +29,7 @@ hs_err_pid*
 .idea/*.xml
 .gradle/
 .iml
+.db
 
 # eclipse things #
 .classpath

@@ -3,7 +3,6 @@ package oauth;
 import java.io.IOException;
 import java.util.Arrays;
 
-import ai.api.GsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.BearerToken;
@@ -16,7 +15,6 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -25,14 +23,74 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-//todo add docs
+/**
+ * Classe piu' importante per la connessione al fitbit
+ */
 public class AuthFitbit {
 
+    /**
+     * Un logger per rendere le cose semplici in caso di casini
+     */
     private static final Logger LOG = LoggerFactory.getLogger("Fitbit Response");
 
+    /**
+     * Un mapper per trasformare i json in mappe.
+     */
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    /**
+     * Directory dove vengono messi i dati utente (Token)<br>
+     * <br>
+     * Throw a Warning when change permission: they said it's a google bug 'cause is meant to run in linux/unix<br>
+     * https://stackoverflow.com/questions/30634827/warning-unable-to-change-permissions-for-everybody<br>
+     * https://github.com/google/google-http-java-client/issues/315<br>
+     */
+    private static final java.io.File DATA_STORE_DIR = new java.io.File(System.getProperty("user.home"), ".store/seniorAssistant");
+
+    /**
+     * OAuth 2 scope.<br>
+     * Nel nostro caso sono le varie categorie dove si trovano le informazioni di cui abbiamo bisogno
+     */
+    private static final String SCOPE[] = new String[]{"activity","heartrate","sleep","settings"};
+
+    /**
+     * Instanza globale di HttpTranspot necessaria per l'autorizzazione e per le richieste
+     */
+    private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
+
+    /**
+     * Istanza globale di una Json Factory
+     */
+    private static final JsonFactory JSON_FACTORY = new JacksonFactory();
+
+    /**
+     * Url dove e' possiblie richiedere il token
+     */
+    private static final String TOKEN_SERVER_URL = " https://api.fitbit.com/oauth2/token";
+
+    /**
+     * Pagina dove si richiede l'autorizzazione a tutti i campi richiesti
+     */
+    private static final String AUTHORIZATION_SERVER_URL = "https://www.fitbit.com/oauth2/authorize";
+
+    /**
+     * Istanza globale del {@link DataStoreFactory}. Il miglior metodo e' creare una singola
+     * istanza globale condivisa attraverso tutta l'applicazione.
+     */
+    private static FileDataStoreFactory DATA_STORE_FACTORY;
+
+    /**
+     * Un HttpRequestFactory che serve per creare una richiesta http
+     */
     private final HttpRequestFactory requestFactory;
 
+    /**
+     * Prova a connettersi al sito di Fitbit per controllare l'autorizzazione<br>
+     * Se la richiesta inviata e' sbagliata lancia una eccezione.<br>
+     * Se l'utente non ha ancora autorizzato l'applicazioe, allora una pagina sul browser (o un link in console) appare<br>
+     * ci si logga e si lascia l'autorizzazione a questa applicazione.
+     * @throws Exception per qualunque cosa apparentemente (e noi ci siamo riusciti)
+     */
     public AuthFitbit() throws Exception {
         DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
         final Credential credential = authorize();
@@ -43,34 +101,9 @@ public class AuthFitbit {
         });
     }
 
-    private static ObjectMapper mapper = new ObjectMapper();
-    /** Directory to store user credentials. */
-    /* Throw a Warning when change permission: they said it's a google bug 'cause is meant to run in linux/unix
-     *
-     * https://stackoverflow.com/questions/30634827/warning-unable-to-change-permissions-for-everybody
-     * https://github.com/google/google-http-java-client/issues/315
-     */
-    private static final java.io.File DATA_STORE_DIR =
-            new java.io.File(System.getProperty("user.home"), ".store/seniorAssistant");
-
     /**
-     * Global instance of the {@link DataStoreFactory}. The best practice is to make it a single
-     * globally shared instance across your application.
+     * Autorizza l'applicazione ad accedere ai dati utente richiesti
      */
-    private static FileDataStoreFactory DATA_STORE_FACTORY;
-
-    /** OAuth 2 scope. */
-    private static final String SCOPE[] = new String[]{"activity","heartrate","sleep","settings"};
-    /** Global instance of the HTTP transport. */
-    private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
-
-    /** Global instance of the JSON factory. */
-    private static final JsonFactory JSON_FACTORY = new JacksonFactory();
-
-    private static final String TOKEN_SERVER_URL = " https://api.fitbit.com/oauth2/token";
-    private static final String AUTHORIZATION_SERVER_URL = "https://www.fitbit.com/oauth2/authorize";
-
-    /** Authorizes the installed application to access user's protected data. */
     private Credential authorize() throws Exception {
         // set up authorization code flow
         AuthorizationCodeFlow flow = new AuthorizationCodeFlow.Builder(BearerToken
@@ -90,38 +123,39 @@ public class AuthFitbit {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize( "user" );
     }
 
-    public <O> O run(String url, Class<O> returnClass) throws IOException {
-        return run(url, returnClass, false);
-    }
-
-    public <O> O run(String url, Class<O> returnClass, boolean useAsParse) throws IOException {
-        FITBITUrl fitbitUrl = new FITBITUrl(url);
-        fitbitUrl.setFields("");
-
-        HttpRequest request = requestFactory.buildGetRequest(fitbitUrl);
+    /**
+     * Effettua una chiamata al server fitbit richiedendo i dati indicati dall'url
+     *
+     * @param url l'url in cui effettuare la richiesta
+     * @return una stringa in formato Json, che e' il risultato
+     * @throws IOException nel caso ci sia un errore con la richiesta
+     */
+    public String run(String url) throws IOException {
+        GenericUrl genericUrl = new GenericUrl(url);
+        HttpRequest request = requestFactory.buildGetRequest(genericUrl);
         HttpResponse response = request.execute();
 
-        /*
-        GenericJson json = response.parseAs(GenericJson.class);
+        String content = response.parseAsString();
         response.disconnect();
+        LOG.debug("Recived: " + content);
 
-        System.out.println(returnClass.getSimpleName());
-        System.out.println(url);
-        System.out.println(json.toPrettyString());
+        return content;
+    }
 
-        return mapper.readValue(json.toString(), returnClass);
-        */
-
-        /**/
-        O ret = ( useAsParse ?
-                response.parseAs(returnClass) :
-                mapper.readValue(response.parseAs(GenericJson.class).toString(), returnClass)
-            );
-
-        response.disconnect();
-
-        // todo remove this, it's only useful if you need to see the request
-        LOG.info(GsonFactory.getDefaultFactory().getGson().toJson(ret));
+    /**
+     * Fa una chiamata al server fitbit richiedendo i dati indicati dall'url<br>
+     * La classe e' richiesta se si vuole fare il parsing diretto e ricevere la classe parsificata con un mapper<br>
+     * in questo modo non tutti i campi devono esistere
+     *
+     * @param url l'url in cui effettuare la richiesta
+     * @param returnClass la classe da ritornare
+     * @param <O> la classe che ritorna
+     * @return un oggetto rappresentante la richiesta fatta all'url
+     * @throws IOException nel caso ci sia un errore con la richiesta o con il parsing di quest'ultima
+     */
+    public <O> O run(String url, Class<O> returnClass) throws IOException {
+        O ret = MAPPER.readValue(this.run(url), returnClass);
+        LOG.debug("Saved in class: " + JSON_FACTORY.toString(ret));
 
         return ret;
         /**/

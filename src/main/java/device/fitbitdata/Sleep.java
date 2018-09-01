@@ -3,6 +3,7 @@ package device.fitbitdata;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -48,14 +49,14 @@ public class Sleep {
     }
 
     public class SleepData {
-        public final Date start_date;
+        public final Timestamp start_date;
         public final long duration;
-        public final Date end_date;
+        public final Timestamp end_date;
 
         public SleepData(Date start_date, long duration) {
-            this.start_date = start_date;
+            this.start_date = new Timestamp(start_date.getTime());
             this.duration = duration;
-            this.end_date = start_date!=null? new Date(start_date.getTime() + duration):null;
+            this.end_date = start_date!=null? new Timestamp(start_date.getTime() + duration):null;
         }
     }
 }
