@@ -137,7 +137,7 @@ public class AuthFitbit {
 
         String content = response.parseAsString();
         response.disconnect();
-        LOG.debug("Recived: " + content);
+        LOG.info("Recived: " + content);
 
         return content;
     }
@@ -155,7 +155,7 @@ public class AuthFitbit {
      */
     public <O> O run(String url, Class<O> returnClass) throws IOException {
         O ret = MAPPER.readValue(this.run(url), returnClass);
-        LOG.debug("Saved in class: " + JSON_FACTORY.toString(ret));
+        LOG.info("Saved in class: " + JSON_FACTORY.toString(ret));
 
         return ret;
         /**/

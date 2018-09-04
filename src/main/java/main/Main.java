@@ -25,14 +25,11 @@ public class Main {
      */
     public static void main(String[] args) {
 
-        // todo setting log level -> useful if you dont need to see a spam of things but not working
-        // System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY , SimpleLogger.S);
-
         LOG.info("Connecting to hue lights");
-        lights = new Hue("192.168.1.7:8090", "newdeveloper");
+        lights = new Hue();
 
         LOG.info("Connecting to the sensors");
-        sensor = new Sensor();
+        sensor = new Sensor(2);
 
         try {
             LOG.info("Connecting to Fitbit");
@@ -44,6 +41,7 @@ public class Main {
             e.printStackTrace();
         }
 
+        startSensorLog(10);
         startWebhook();
     }
 
@@ -94,6 +92,29 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * funzione che logga periodicalmente i valori ricevuti dal sensore
+     */
+    private static void startSensorLog(int seconds) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public synchronized void run() {
+                boolean notInterrupted = true;
+                while(notInterrupted) {
+                    try {
+                        sensor.update((seconds/2) * 1000);
+                        LOG.info("Luminosità rilevata: " + sensor.getBrightnessLevel());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        notInterrupted = false;
+                    }
+                }
+            }
+        }, "sensor");
+
+        thread.start();
     }
 
     /*

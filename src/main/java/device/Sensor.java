@@ -6,6 +6,7 @@ import de.fh_zwickau.informatik.sensor.model.devices.Device;
 import de.fh_zwickau.informatik.sensor.model.devices.DeviceList;
 import support.ZWaySimpleCallback;
 
+// TODO da mettere a posto secondo me, dato che da un po di problemi IRL
 /**
  * Sensore che permette di registrare vari dati dell'ambiente
  */

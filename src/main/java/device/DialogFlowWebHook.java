@@ -91,7 +91,7 @@ public class DialogFlowWebHook {
             Map<String, JsonElement> inputParam = input.getResult().getParameters();
             String text;
             try {
-                LOG.debug("AZIONE: "+ inputAction + ", PARAMS: " + inputParam);
+                LOG.info("AZIONE: "+ inputAction + ", PARAMS: " + inputParam);
                 Action action = actions.get(inputAction);
                 try {
                     text = action.doAction(inputParam);
@@ -107,7 +107,7 @@ public class DialogFlowWebHook {
             if(text == null)
                 text = input.getResult().getFulfillment().getSpeech();
 
-            LOG.debug("RISPOSTA: " + text);
+            LOG.info("RISPOSTA: " + text);
             output.setDisplayText(text);
             output.setSpeech(text);
 

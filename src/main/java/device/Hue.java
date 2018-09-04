@@ -5,12 +5,19 @@ import java.util.Map;
 import java.util.Set;
 
 import ai.api.GsonFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import support.Rest;
 
 /**
  * Classe che permette di controllare le luci Philips Hue
  */
 public class Hue {
+
+    /**
+     * Log che serve per debug
+     */
+    private static final Logger LOG = LoggerFactory.getLogger("Hue");
 
     /**
      * La luminopsita' massima a cui si puo' arrivare
@@ -41,16 +48,16 @@ public class Hue {
      * Riempimento della mappa con i vari colori
      */
     static { // todo set right colors (in the simulation they are off, maybe in reality are ok)
-        COLORS.put("giall[oae]", new Double[]{0.475, 0.475});
+        COLORS.put("giall[oae]", new Double[]{0.475, 0.475}); //wrong
         COLORS.put("ross[oae]", new Double[]{0.7, 0.25});
         COLORS.put("verd[ei]", new Double[]{0.1, 0.55});
-        COLORS.put("blu", new Double[]{0.15, 0.175});
+        COLORS.put("blu", new Double[]{0.15, 0.175}); //wrong
         COLORS.put("rosa", new Double[]{0.45, 0.275});
         COLORS.put("viola", new Double[]{0.25, 0.1});
         COLORS.put("azzurr[oae]", new Double[]{0.15, 0.25});
-        COLORS.put("arancio(ne|ni)?", new Double[]{0.6, 0.35});
+        COLORS.put("arancio(ne|ni)?", new Double[]{0.6, 0.35}); //wrong
         //COLORS.put("nero", new Double[]{1.0, 1.0});
-        COLORS.put("bianc(o|a|he)", new Double[]{0.3, 0.25});
+        COLORS.put("bianc(o|a|he)", new Double[]{0.3, 0.25}); //wrong
     }
 
     /**
@@ -81,8 +88,8 @@ public class Hue {
             }
             bri = bri/allLights.size();
             hue = hue/allLights.size();
-            setState("bri", String.valueOf(bri));
-            setState("hue", String.valueOf(hue));
+            setState("bri", (int) bri );
+            setState("hue", (int) hue );
 
             brightness = (bri*MAX_BRIGHTNESS)/100;
         }
@@ -108,12 +115,12 @@ public class Hue {
     /**
      * Accende tutte le luci controllate
      */
-    public void turnOn() { setState("on", "true"); }
+    public void turnOn() { setState("on", true, false); }
 
     /**
      * Spegne tutte le luci controllate
      */
-    public void turnOff() { setState("on", "false"); }
+    public void turnOff() { setState("on", false, false); }
     
     /**
      * Ritorna la liminosita' attuale delle luci controllate
@@ -131,7 +138,7 @@ public class Hue {
     	else if (num>100)
     	    num=100;
 
-    	setState("bri", String.valueOf( (num*MAX_BRIGHTNESS)/100) );
+    	setState("bri", (int) (num*MAX_BRIGHTNESS)/100 );
         brightness = num;
     }
 
@@ -148,9 +155,9 @@ public class Hue {
     }
 
     /**
-     * Aumenta la luminosita' delle luci controllate del 15%
+     * Aumenta la luminosita' delle luci controllate del 25%
      */
-    public void increaseBrightness() { increaseBrightness(15); }
+    public void increaseBrightness() { increaseBrightness(25); }
 
     /**
      * Dinuisce la luminosita' delle luci controllate della percentuale che viene passata
@@ -165,14 +172,14 @@ public class Hue {
     }
 
     /**
-     * Dinuisce la luminosita' delle luci controllate del 15%
+     * Dinuisce la luminosita' delle luci controllate del 25%
      */
-    public void decreaseBrightness() { decreaseBrightness(15); }
+    public void decreaseBrightness() { decreaseBrightness(25); }
 
     public void changeColor(String colorName) {
         for (String regex: COLORS.keySet())
             if(colorName.matches("(?i)" + regex))
-                setState("xy", GsonFactory.getDefaultFactory().getGson().toJson(COLORS.get(regex)));
+                setState("xy", COLORS.get(regex));
     }
 
     /**
@@ -181,17 +188,43 @@ public class Hue {
     public void colorLoop() { setState("effect", "colorloop"); }
 
     /**
-     * Funzione generale per poter utilizzare qualunque valore, ma non funziona<br>
-     * Da testare, visto che mi sembra strano che non funzi...<br>
-     * e invece funziona.
+     * Invia una richiesta a tutte le luci hue con l'attributo selezionato ed il suo valore<br>
+     * Con esso invia anche una transition:20 in modo che sia piu fluido il cambiamento
+     * @param attribute l'attributo che si vuole cambiare
+     * @param value il valore da inserire
      */
-    public void setState(String attribute, String value){
+    public void setState(String attribute, Object value){
+        setState(attribute, value, true);
+    }
+
+    /**
+     * Invia una richiesta a tutte le luci hue con l'attributo selezionato ed il suo valore<br>
+     * Con esso invia anche una transition:20 in modo che sia piu fluido il cambiamento se si mette true al terzo parametro
+     * @param attribute l'attributo da modificare
+     * @param value il valore da inserire
+     * @param transition se includere la transizione o meno
+     */
+    public void setState(String attribute, Object value, boolean transition){
+        Map<String, Object> map = new HashMap<>();
+        map.put(attribute, value);
+        if(transition)
+            map.put("transition", 20);
+        setState(map);
+    }
+
+    /**
+     * Invia una richiesta a tutte le luci hue con gli attributi selezionati ed il loro valore
+     * @param attributes una mappa di attributi -> valori
+     */
+    public void setState(Map<String, Object> attributes) {
+        String body = GsonFactory.getDefaultFactory().getGson().toJson(attributes);
+        LOG.info("Setting: " + body);
         for (String light : allLights.keySet()) {
+            Rest.put(lightsURL + light + "/state", body,"application/json");
+
             Map<String, Object> state = (Map<String, Object>)allLights.get(light).get("state");
-            Rest.put(lightsURL + light + "/state",
-                    "{ \"" + attribute + "\" : " + value + ", \"transitiontime\": 10 }", // todo check transition
-                    "application/json");
-            state.put(attribute, value);
+            for (String attr : attributes.keySet())
+                state.put(attr, attributes.get(attr));
         }
     }
 }

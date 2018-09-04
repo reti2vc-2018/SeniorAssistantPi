@@ -10,11 +10,18 @@ import device.fitbitdata.HeartRate;
 import device.fitbitdata.Sleep;
 import device.fitbitdata.Steps;
 import oauth.AuthFitbit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Classe che permette di ricevere i dati di un particolare account FitBit
  */
 public class Fitbit {
+
+	/**
+	 * Logger per vedere cosa invia e riceve questa classe
+	 */
+	private static final Logger LOG = LoggerFactory.getLogger("Fitbit");
 
 	/**
 	 * Url da dove si possono prendere i dati dai vari dispositivi fitbit
@@ -163,6 +170,7 @@ public class Fitbit {
 			// do nothing and update
 		}
 		latestRequest.put(varClass, System.currentTimeMillis());
+		LOG.info("Updating " + varClass.getSimpleName() + " form " + BASIC_URL + url);
 		return auth.run(BASIC_URL + url, varClass);
 	}
 

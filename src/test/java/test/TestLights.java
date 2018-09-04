@@ -13,7 +13,7 @@ public class TestLights {
 
     @Test
     synchronized public void firstTestLights() throws InterruptedException {
-        Hue lights = new Hue("localhost:8090", "newdeveloper");
+        Hue lights = new Hue();
 
         Set<String> toRemove = new HashSet<>();
         for(String str: lights.getNameLights())
