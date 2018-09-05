@@ -42,21 +42,24 @@ public class Sensor {
 
     /**
      * Crea un sensore contenente tutti i nodi
+     * @throws NullPointerException se non trova nessun sensore
      */
-    public Sensor() {
-        this(null);
-    }
+    public Sensor() throws NullPointerException { this(null); }
 
     /**
      * Si connette ad un sensore che ha il nodeId selezioniato
      * @param nodeId nodo che viene selezionato
+     * @throws NullPointerException se non trova nessun sensore
      */
-    public Sensor (Integer nodeId) {
+    public Sensor (Integer nodeId) throws NullPointerException {
         // create an instance of the Z-Way library; all the params are mandatory (we are not going to use the remote service/id)
         IZWayApi zwayApi = new ZWayApiHttp(IP_ADDRESS, PORT, "http", USERNAME, PASSWORD, 0, false, new ZWaySimpleCallback());
 
         // get all the Z-Wave devices
         allZWaveDevices = zwayApi.getDevices();
+
+        if(allZWaveDevices == null)
+            throw new NullPointerException("I sensori non sono stati trovati");
 
         if(nodeId != null)
             useNode(nodeId);
@@ -94,7 +97,10 @@ public class Sensor {
     synchronized public void update(int timeout) throws InterruptedException {
         wait(timeout);
         for (Device device : devices.getAllDevices())
-            device.update();
+            try {
+                device.update();
+            } catch (Exception e) {}
+
         wait(timeout);
     }
     /*

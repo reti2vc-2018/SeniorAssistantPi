@@ -3,6 +3,7 @@ package support;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import com.google.gson.Gson;
 
 import org.apache.http.HttpResponse;
@@ -13,15 +14,22 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * A generic class to perform HTTP calls and parse the resulting JSON.
- *
- * @author <a href="mailto:luigi.derussis@uniupo.it">Luigi De Russis</a>
- * @version 1.0 (18/05/2017)
+ * Una classe generica che invia delle richieste Rest e le parsifica nel JSON corrispondente
  */
 public class Rest {
 
-    // init gson
+    /**
+     * Un logger per vedere quando le richieste falliscono
+     */
+    private static final Logger LOG = LoggerFactory.getLogger("Rest");
+
+    /**
+     * Un GSON utile per il parsing della risposta
+     */
     private static final Gson gson = new Gson();
 
     /**
@@ -31,14 +39,12 @@ public class Rest {
      * @return the response, parsed from JSON
      */
     public static Map<String, ?> get(String URL) {
-        // init
         Map<String, ?> response = new HashMap<>();
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpGet request = new HttpGet(URL);
 
-        CloseableHttpResponse result = null;
-
+        CloseableHttpResponse result;
         try {
             result = httpclient.execute(request);
             String json = EntityUtils.toString(result.getEntity());
@@ -48,7 +54,7 @@ public class Rest {
             result.close();
             httpclient.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("GET: " + e.getMessage());
         }
 
         return response;
@@ -62,11 +68,10 @@ public class Rest {
      * @param contentType the content type of the request
      */
     public static void put(String URL, String contentBody, String contentType) {
-        // init
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpPut request = new HttpPut(URL);
-        StringEntity params = null;
 
+        StringEntity params;
         try {
             params = new StringEntity(contentBody);
             request.addHeader("content-type", contentType);
@@ -76,7 +81,7 @@ public class Rest {
             // should be in finally...
             httpclient.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("PUT: " + e.getMessage());
         }
 
     }

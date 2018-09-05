@@ -62,10 +62,9 @@ public class Hue {
 
     /**
      * Cerca le luci Philips Hue a ll'indirizzo <a href="http://172.30.1.138/api/C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx/lights/">http://172.30.1.138/api/C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx/lights/</a>
+     * @throws NullPointerException se non trova nessun bridge
      */
-    public Hue () {
-        this("172.30.1.138", "C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx");
-    }
+    public Hue () throws NullPointerException { this("172.30.1.138", "C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx"); }
 
     /**
      * Cerca le luci Philips Hue nell'indirizzo specificato e con l'utente specificato.<br>
@@ -73,10 +72,14 @@ public class Hue {
      * (per ora fa una media e poi assegna il valore risultante a tutte)
      * @param ip l'indirizzo IP (seguito dalla porta se e' diversa dalla solita 8000)
      * @param user l'utente
+     * @throws NullPointerException se non trova nessun bridge
      */
-    public Hue(String ip, String user) {
+    public Hue(String ip, String user) throws NullPointerException {
         lightsURL = "http://" + ip + "/api/" + user + "/lights/";
         allLights = (Map<String, Map<String, Object>>)Rest.get(lightsURL);
+
+        if(allLights.isEmpty())
+            throw new NullPointerException("Non e' stato possibile connettersi alle luci");
 
         if(allLights.size() != 0) {
             double bri = 0;
@@ -88,8 +91,11 @@ public class Hue {
             }
             bri = bri/allLights.size();
             hue = hue/allLights.size();
-            setState("bri", (int) bri );
-            setState("hue", (int) hue );
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("bri", (int)bri);
+            map.put("hue", (int)hue);
+            setState(map);
 
             brightness = (bri*MAX_BRIGHTNESS)/100;
         }
@@ -113,14 +119,20 @@ public class Hue {
     }
 
     /**
+     * Accende o spegne le luci controllate
+     * @param on vero se si vuole le luci accese, false per spegnerle
+     */
+    public void on(boolean on) { setState("on", on, false); }
+
+    /**
      * Accende tutte le luci controllate
      */
-    public void turnOn() { setState("on", true, false); }
+    public void turnOn() { on(true); }
 
     /**
      * Spegne tutte le luci controllate
      */
-    public void turnOff() { setState("on", false, false); }
+    public void turnOff() { on(false); }
     
     /**
      * Ritorna la liminosita' attuale delle luci controllate

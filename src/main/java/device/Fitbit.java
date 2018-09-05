@@ -119,7 +119,7 @@ public class Fitbit {
 		if (now.compareTo(ago) < 0)
 			ago = "00:00";
 
-		heart = update(HeartRate.class, heart,"1" + USER + "activities/heart/date/today/1d/1sec/time/" + ago + "/" + now + ".json");
+		heart = update(HeartRate.class, null,"1" + USER + "activities/heart/date/today/1d/1sec/time/" + ago + "/" + now + ".json");
 		return heart.getAverage();
 	}
 
@@ -154,7 +154,7 @@ public class Fitbit {
 	 * Altrimenti viene ritornata la variabile passata
 	 *
 	 * @param varClass la classe della variabile passata
-	 * @param variable la variabile che vede fare l'update
+	 * @param variable la variabile che deve fare l'update (passando null si forza la richiesta)
 	 * @param url l'url da cui prende i dati aggiornati
 	 * @return la variabile aggiornata
 	 */
@@ -164,7 +164,7 @@ public class Fitbit {
 			long latest = latestRequest.get(varClass);
 
 			// don't update
-			if(current - latest < MINUTE * 5)
+			if( (variable!=null) && (current - latest < MINUTE * 5) )
 				return variable;
 		} catch (NullPointerException e) {
 			// do nothing and update
