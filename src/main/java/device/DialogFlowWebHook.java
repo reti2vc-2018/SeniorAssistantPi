@@ -23,7 +23,7 @@ public class DialogFlowWebHook {
     /**
      * Un logger per vedere le cose piu' easy
      */
-    private static final Logger LOG = LoggerFactory.getLogger(DialogFlowWebHook.class);
+    private static final Logger LOG = LoggerFactory.getLogger("WebHook");
 
     /**
      * Stringa che viene usata se l'azione esiste ma lancia un qualche tipo di errore

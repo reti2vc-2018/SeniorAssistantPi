@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import support.Database;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -25,7 +26,16 @@ public class Main {
     private static Sensor sensor = null;
 
     /**
-     * Funzione principale, qui si  creano tutte le classi che verranno utilizzate.
+     * Funzione principale, qui si  creano tutte le classi che verranno utilizzate.<br>
+     * Si possono passare dei parametri usando -(nome parametro)::(valore parametro)<br>
+     * Ogni parametro deve esser separato da uno o piu spazi<br>
+     * Parametri possibili:<br>
+     * <ul>
+     *     <li>hueAddress</li>
+     *     <li>hueUser</li>
+     *     <li>sensorNode</li>
+     *     <li>sensorLog</li>
+     * </ul>
      * @param args per ora nulla, ma forse in futuro si potrebbe mettere roba
      */
     public static void main(String[] args) {
@@ -46,7 +56,8 @@ public class Main {
                 sensor = new Sensor(sensorNode);
 
                 if(sensorLog>0)
-                startSensorLog(sensorLog);
+                    startSensorLog(sensorLog);
+                startHueAutoBrightness();
             } catch (Exception e) {
                 LOG.warn(e.getMessage());
             }
@@ -64,7 +75,6 @@ public class Main {
                 e.printStackTrace();
             }
 
-            startHueAutoBrightness();
             startWebhook();
         } catch (Exception e) {
             LOG.error(e.getMessage());
@@ -132,7 +142,7 @@ public class Main {
                 while(notInterrupted) {
                     try {
                         sensor.update((seconds/2) * 1000);
-                        LOG.info("Luminosità rilevata: " + sensor.getBrightnessLevel());
+                        LOG.info("Luminosita' rilevata: " + sensor.getBrightnessLevel());
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                         notInterrupted = false;
@@ -151,6 +161,51 @@ public class Main {
         // se troppo bassa alzare la luci di poco
         // se troppo alta abbassare le luci
         // se l'utente modifica la luminosita' delle luci allora non fare nulla per almeno 20/30 minuti o di piu
+        /*
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public synchronized void run() {
+                boolean notInterrupted = true;
+                Calendar calendar = Calendar.getInstance();
+                while(notInterrupted) {
+                    calendar.setTimeInMillis(System.currentTimeMillis());
+                    int bright = sensor.getBrightnessLevel();
+                    int hour = calendar.get(Calendar.HOUR_OF_DAY);
+
+                    if(hour >= 21 && hour<7) {
+                        lights.setBrightness(5);
+                    }
+                    else if(hour >= 19 && hour<21) {
+                        lights.setBrightness(99);
+                    }
+                    else if(hour >= 7 && hour<19) {
+                        lights.setBrightness(0);
+                    }
+
+                    try {
+                        wait(120000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        notInterrupted = false;
+                    }
+
+                    if(hour >= 21 && hour<7)
+                        lights.setBrightness(5);
+                    else if(bright >= 0 && bright <= 20)
+                        lights.setBrightness(90);
+                    else if(bright >= 21 && bright <= 40)
+                        lights.setBrightness(60);
+                    else if(bright >= 41 && bright <= 60)
+                        lights.setBrightness(40);
+                    else
+                        lights.turnOff();
+
+                }
+            }
+        }, "auto-brightness");
+
+        thread.start();
+        */
     }
 
     // TODO AUTO:{C} Gestione luci a seconda del battito cardiaco

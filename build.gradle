@@ -25,6 +25,7 @@ dependencies {
 
     // Z-way
     compile files('lib/zway-lib-0.2.9-SNAPSHOT.jar')
+    compile 'org.apache.commons:commons-lang3:3.8'
 
     // Logger
     compile 'org.slf4j:slf4j-simple:1.7.25'
@@ -33,7 +34,6 @@ dependencies {
 	compile "com.sparkjava:spark-core:2.7.2"
 
     // Oauth
-//    compile group: 'org.pac4j', name: 'spark-pac4j', version: '2.3.0' //todo use this insted?
     compile ( group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: '1.23.0') {
         // don't pull in an old ancient jetty version
         exclude group: 'org.mortbay.jetty', module: 'jetty'

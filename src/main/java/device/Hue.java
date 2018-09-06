@@ -47,17 +47,17 @@ public class Hue {
     /**
      * Riempimento della mappa con i vari colori
      */
-    static { // todo set right colors (in the simulation they are off, maybe in reality are ok)
-        COLORS.put("giall[oae]", new Double[]{0.475, 0.475}); //wrong
+    static {
+        COLORS.put("giall[oae]", new Double[]{0.45, 0.45});
         COLORS.put("ross[oae]", new Double[]{0.7, 0.25});
         COLORS.put("verd[ei]", new Double[]{0.1, 0.55});
-        COLORS.put("blu", new Double[]{0.15, 0.175}); //wrong
+        COLORS.put("blu", new Double[]{0.12, 0.125});
         COLORS.put("rosa", new Double[]{0.45, 0.275});
         COLORS.put("viola", new Double[]{0.25, 0.1});
         COLORS.put("azzurr[oae]", new Double[]{0.15, 0.25});
-        COLORS.put("arancio(ne|ni)?", new Double[]{0.6, 0.35}); //wrong
+        COLORS.put("arancio(ne|ni)?", new Double[]{0.55, 0.4});
         //COLORS.put("nero", new Double[]{1.0, 1.0});
-        COLORS.put("bianc(o|a|he)", new Double[]{0.3, 0.25}); //wrong
+        COLORS.put("bianc(o|a|he)", new Double[]{0.275, 0.3});
     }
 
     /**
@@ -81,24 +81,22 @@ public class Hue {
         if(allLights.isEmpty())
             throw new NullPointerException("Non e' stato possibile connettersi alle luci");
 
-        if(allLights.size() != 0) {
-            double bri = 0;
-            double hue = 0;
-            for (String name: allLights.keySet()) {
-                Map<String, Object> state = (Map<String, Object>)allLights.get(name).get("state");
-                bri += (Double) state.get("bri");
-                hue += (Double) state.get("hue");
-            }
-            bri = bri/allLights.size();
-            hue = hue/allLights.size();
-
-            Map<String, Object> map = new HashMap<>();
-            map.put("bri", (int)bri);
-            map.put("hue", (int)hue);
-            setState(map);
-
-            brightness = (bri*MAX_BRIGHTNESS)/100;
+        double bri = 0;
+        double hue = 0;
+        for (String name: allLights.keySet()) {
+            Map<String, Object> state = (Map<String, Object>)allLights.get(name).get("state");
+            bri += (Double) state.get("bri");
+            hue += (Double) state.get("hue");
         }
+        bri = bri/allLights.size();
+        hue = hue/allLights.size();
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("bri", (int)bri);
+        map.put("hue", (int)hue);
+        setState(map);
+
+        brightness = (bri*MAX_BRIGHTNESS)/100;
     }
 
     /**
@@ -220,7 +218,7 @@ public class Hue {
         Map<String, Object> map = new HashMap<>();
         map.put(attribute, value);
         if(transition)
-            map.put("transition", 20);
+            map.put("transition", 200);
         setState(map);
     }
 

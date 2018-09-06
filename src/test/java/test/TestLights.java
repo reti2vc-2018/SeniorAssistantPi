@@ -40,7 +40,7 @@ public class TestLights {
         }
 
         lights.setBrightness(Hue.MAX_BRIGHTNESS);
-        lights.colorLoop(); // todo not working in simulator
+        lights.colorLoop();
         this.wait(TIMEOUT*10);
 
         // change colors

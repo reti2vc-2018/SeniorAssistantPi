@@ -12,8 +12,6 @@
  * the License.
  */
 
-// todo test if fitbit request still works with this class
-
 package oauth;
 
 import com.google.api.client.extensions.java6.auth.oauth2.VerificationCodeReceiver;
