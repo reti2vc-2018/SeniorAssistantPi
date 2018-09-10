@@ -83,7 +83,6 @@ public class Rest {
         } catch (Exception e) {
             LOG.error("PUT: " + e.getMessage());
         }
-
     }
 
 }

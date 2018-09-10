@@ -49,14 +49,12 @@ public class Sleep {
     }
 
     public class SleepData {
-        public final Timestamp start_date;
+        public final long start_date;
         public final long duration;
-        public final Timestamp end_date;
 
         public SleepData(Date start_date, long duration) {
-            this.start_date = new Timestamp(start_date.getTime());
+            this.start_date = start_date.getTime();
             this.duration = duration;
-            this.end_date = start_date!=null? new Timestamp(start_date.getTime() + duration):null;
         }
     }
 }

@@ -92,16 +92,17 @@ public class Sensor {
     /**
      * Fa in modo di forzare l'aggiornamento dei dispositivi
      * @param timeout fa aspettare un tot di tempo prima di provare a forzare e dopo l'aggiornameto
-     * @throws InterruptedException nel caso che succeda qualcosa
      */
-    synchronized public void update(int timeout) throws InterruptedException {
-        wait(timeout);
-        for (Device device : devices.getAllDevices())
-            try {
-                device.update();
-            } catch (Exception e) {}
+    synchronized public void update(int timeout) {
+        try {
+            wait(timeout / 2);
+            for (Device device : devices.getAllDevices())
+                try {
+                    device.update();
+                } catch (Exception e) { }
 
-        wait(timeout);
+            wait(timeout / 2);
+        } catch (InterruptedException e) { }
     }
     /*
     public boolean IsLowLuminescence(int Luminescence) {

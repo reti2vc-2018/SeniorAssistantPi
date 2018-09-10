@@ -85,7 +85,7 @@ public class Fitbit {
 	 * @return un intero rappresentante i passi effettuati
 	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
-	public synchronized int getSteps() throws IOException {
+	public synchronized int getSteps() {
 		steps = update(Steps.class, steps, "1" + USER + "activities/steps/date/today/1w.json");
 		return steps.getSteps();
 	}
@@ -97,7 +97,7 @@ public class Fitbit {
 	 * @return un intero rappresentante la media del battito cardiaco degli ultimi 15 minuti
 	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
-	public synchronized double getHeartRate() throws IOException { return getHeartRate(15); }
+	public synchronized double getHeartRate() { return getHeartRate(15); }
 
 	/**
 	 * Ricevi il battito cardiaco dell'utente<br>
@@ -107,7 +107,7 @@ public class Fitbit {
 	 * @return un intero rappresentante la media del battito cardiaco degli ultimi minuti specificati
 	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
-	public synchronized double getHeartRate(int lastMinutes) throws IOException {
+	public synchronized double getHeartRate(int lastMinutes) {
 		if(lastMinutes<=0)
 			return -1;
 
@@ -129,7 +129,7 @@ public class Fitbit {
 	 * @return un intero rappresentante le ore passate a dormire
 	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
-	public synchronized long getHoursSleep() throws IOException {
+	public synchronized long getHoursSleep() {
 		sleep = update(Sleep.class, sleep,"1.2" + USER + "sleep/date/today.json");
 		return sleep.getMinutesAsleep()/60;
 	}
@@ -143,7 +143,7 @@ public class Fitbit {
 	 * @return una lista contenente ogni volta che l'utente ha dormito
 	 * @throws IOException
 	 */
-	public synchronized List<Sleep.SleepData> getDetailedSleep() throws IOException {
+	public synchronized List<Sleep.SleepData> getDetailedSleep() {
 		sleep = update(Sleep.class, sleep,"1.2" + USER + "sleep/date/today.json");
 		return sleep.getDatas();
 	}
@@ -151,14 +151,15 @@ public class Fitbit {
 	/**
 	 * Semplice funzione che controlla che si possa fare l'update o meno di una specifica classe.<br>
 	 * Se e' possibile fare l'update viene mandata una run all'url selezionato e viene ritornata la variabile aggiornata<br>
-	 * Altrimenti viene ritornata la variabile passata
+	 * Altrimenti viene ritornata la variabile passata<br>
+	 * Nel caso di fallimento della richiesta varra' restituito la variabile passata in input
 	 *
 	 * @param varClass la classe della variabile passata
 	 * @param variable la variabile che deve fare l'update (passando null si forza la richiesta)
 	 * @param url l'url da cui prende i dati aggiornati
 	 * @return la variabile aggiornata
 	 */
-	private synchronized <T> T update(Class<T> varClass, T variable, String url) throws IOException {
+	private synchronized <T> T update(Class<T> varClass, T variable, String url) {
 		try {
 			long current = System.currentTimeMillis();
 			long latest = latestRequest.get(varClass);
@@ -168,10 +169,16 @@ public class Fitbit {
 				return variable;
 		} catch (NullPointerException e) {
 			// do nothing and update
+		} finally {
+			LOG.info("Updating " + varClass.getSimpleName() + " form " + BASIC_URL + url);
+			try {
+				variable = auth.run(BASIC_URL + url, varClass);
+				latestRequest.put(varClass, System.currentTimeMillis());
+			} catch (IOException e) {
+				LOG.error("Non sono riuscito a prender i dati aggiornati: " + e.getMessage());
+			}
+			return variable;
 		}
-		latestRequest.put(varClass, System.currentTimeMillis());
-		LOG.info("Updating " + varClass.getSimpleName() + " form " + BASIC_URL + url);
-		return auth.run(BASIC_URL + url, varClass);
 	}
 
 	/**

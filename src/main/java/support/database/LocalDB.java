@@ -1,0 +1,106 @@
+package support.database;
+
+import device.fitbitdata.HeartRate;
+
+import java.sql.*;
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * Classe che utilizza un database sqlite che contiene le seguenti tabelle:<br>
+ * <ul>
+ *     <li>'heart' battito + orario</li>
+ *     <li>'sleep' inizio + durata</li>
+ *     <li>'steps' data + passi.</li>
+ * </ul>
+ */
+public class LocalDB implements Database {
+
+    /**
+     * Il percorso di dove trovare il database, strutturato in: &lt;interfaccia&gt;:&lt;implementazione&gt;:&lt;percorso vero e proprio&gt;
+     */
+    public static final String DB_LOCATION = "jdbc:sqlite:";
+
+    /**
+     * Il nome del database (aka il nome del file)
+     */
+    public static final String DB_NAME = "user_data.db";
+
+    /**
+     * La connessione al database
+     */
+    private final Connection conn;
+
+    /**
+     * Crea una connessione al Database specificato in DB_LOCATION e con il nome DB_NAME.
+     * Se il Database non esiste lo crea e inizializza anche delle tabelle:
+     * <ul>
+     *     <li>'heart' battito + orario</li>
+     *     <li>'sleep' inizio + durata</li>
+     *     <li>'step' data + passi.</li>
+     * </ul>
+     * @throws SQLException se qualcosa e' andato storto
+     */
+    public LocalDB() throws SQLException {
+        conn = DriverManager.getConnection(DB_LOCATION + DB_NAME);
+        Statement statement = conn.createStatement();
+        statement.execute("CREATE TABLE IF NOT EXISTS heart (day DATE PRIMARY KEY, rate DOUBLE)");
+        statement.execute("CREATE TABLE IF NOT EXISTS sleep (sleep_start DATE PRIMARY KEY, duration INTEGER)");
+        statement.execute("CREATE TABLE IF NOT EXISTS steps (day DATE PRIMARY KEY, steps INTEGER)");
+    }
+
+    @Override
+    public boolean isReachable() { return conn!=null; }
+
+    @Override
+    public boolean updateHeart(long dateMilliSec, double heartRate) {
+        return query("INSERT INTO heart (day, rate) VALUES ( ' " + new Timestamp(dateMilliSec) + " ', '" + heartRate + "')");
+    }
+
+    @Override
+    public boolean updateSleep(long dateStartSleep, long duration) {
+        return query("INSERT INTO sleep (sleep_start, duration) VALUES ( ' " + new Timestamp(dateStartSleep) + " ', '" + duration + "')");
+    }
+
+    @Override
+    public boolean updateSteps(long dateMilliSec, long steps) {
+        return query("INSERT INTO steps (day, steps) VALUES ( ' " + new Timestamp(dateMilliSec) + " ', '" + steps + "')");
+    }
+
+    @Override
+    public List<HeartRate> getHeartDataOfLast(int days) {
+        try {
+            int dayToSubtract = 15;
+//            Calendar calendar = Calendar.getInstance();
+//            calendar.setTimeInMillis(System.currentTimeMillis());
+//            calendar.add(Calendar.DATE, -dayToSubtract);
+//            long time = calendar.getTimeInMillis();
+            long time = System.currentTimeMillis() - (dayToSubtract * 24 * 60 * 1000); // meno 24 giorni per 60 secondi per 100 millisec
+
+            ResultSet result = conn.createStatement().executeQuery("SELECT * FROM heart WHERE day>='" + new Timestamp(time) + "'");
+            List<HeartRate> list = new LinkedList<>();
+
+            while(result.next()) {
+                HeartRate rate = new HeartRate();
+                rate.setAverage(result.getDouble("rate"));
+                rate.setDate(result.getDate("day").getTime());
+
+                list.add(rate);
+            }
+            return list;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private boolean query(String sql) {
+        try {
+            conn.createStatement().execute(sql);
+            return true;
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
+            return false;
+        }
+    }
+}

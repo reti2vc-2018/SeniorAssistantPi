@@ -7,11 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class HeartRate {
+public class HeartRate extends FitbitData {
 
     private double average;
-
-    public double getAverage() { return average; }
 
     @JsonProperty("activities-heart-intraday")
     public void setAverage(Map<String, Object> map) {
@@ -25,4 +23,7 @@ public class HeartRate {
         if(data.size() == 0)
             average = 0;
     }
+
+    public void setAverage(double average) { this.average = average; }
+    public double getAverage() { return average; }
 }

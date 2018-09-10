@@ -1,16 +1,16 @@
 package main;
 
 import device.*;
+import device.fitbitdata.HeartRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import support.Database;
+import support.database.Database;
+import support.database.LocalDB;
+import support.database.RemoteDB;
 
-import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,6 +28,7 @@ public class Main {
     private static Hue lights = null;
     private static Fitbit fitbit = null;
     private static Sensor sensor = null;
+    private static Database database = null;
 
     /**
      * Funzione principale, qui si  creano tutte le classi che verranno utilizzate.<br>
@@ -39,8 +40,9 @@ public class Main {
      *     <li>hueUser</li>
      *     <li>sensorNode</li>
      *     <li>sensorLog</li>
+     *     <li>remoteDb</li>
      * </ul>
-     * @param args per ora nulla, ma forse in futuro si potrebbe mettere roba
+     * @param args
      */
     public static void main(String[] args) {
         Map<String, String> arguments = getArgsMap(args);
@@ -50,6 +52,7 @@ public class Main {
         String hueUser = arguments.get("hueUser");
         Integer sensorLog = getInt(arguments.get("sensorLog"));
         Integer sensorNode = getInt(arguments.get("sensorNode"));
+        String remoteDbUrl = arguments.get("remoteDb");
 
         try {
             LOG.info("Connessione alle Philips Hue...");
@@ -69,6 +72,9 @@ public class Main {
             try {
                 LOG.info("Connessione al Fitbit, ignorare eventuale errore per setPermissionsToOwnerOnly...");
                 fitbit = new Fitbit();
+
+                LOG.info("Connessione al database...");
+                database = remoteDbUrl==null? new LocalDB():new RemoteDB(remoteDbUrl);
 
                 startInsertData();
                 startCheckSteps();
@@ -121,10 +127,8 @@ public class Main {
      */
     private static void startInsertData() {
         try {
-            Database database = Database.getInstance();
-
-            Thread hourlyData = new Thread(database.insertHourlyData(fitbit), "updating-hour-data");
-            Thread dailyData = new Thread(database.insertDailyData(fitbit), "updating-day-data");
+            Thread hourlyData = Database.insertHourlyDataIn(database, fitbit, 5);
+            Thread dailyData = Database.insertDailyData(database, fitbit, 5);
 
             LOG.info("Starting threads for automatic update");
             hourlyData.start();
@@ -138,24 +142,18 @@ public class Main {
     /**
      * funzione che logga periodicalmente i valori ricevuti dal sensore
      */
-    private static void startSensorLog(int seconds) {
-        Thread thread = new Thread(new Runnable() {
+    private static void startSensorLog(int minutes) {
+        LOG.info("Starting thread for logging sensor data");
+
+        Runnable runnable = new Runnable() {
             @Override
             public synchronized void run() {
-                boolean notInterrupted = true;
-                while(notInterrupted) {
-                    try {
-                        sensor.update((seconds/2) * 1000);
-                        LOG.info("Luminosita' rilevata: " + sensor.getBrightnessLevel());
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        notInterrupted = false;
-                    }
-                }
+                sensor.update(0);
+                LOG.info("Luminosita' rilevata: " + sensor.getBrightnessLevel());
             }
-        }, "sensor");
+        };
 
-        thread.start();
+        Database.getThreadStartingEach(runnable, "sensor", minutes).start();
     }
 
     // TODO AUTO:{B} Gestione luci in modo che la luminosità sia sempre la stessa
@@ -172,7 +170,6 @@ public class Main {
                 boolean notInterrupted = true;
                 Calendar calendar = Calendar.getInstance();
                 while(notInterrupted) {
-                    calendar.setTimeInMillis(System.currentTimeMillis());
                     int bright = sensor.getBrightnessLevel();
                     int hour = calendar.get(Calendar.HOUR_OF_DAY);
 
@@ -220,53 +217,42 @@ public class Main {
         // controllare che non differiscano di un valore Delta
         // se differiscono di almeno Delta modificare le luci abbassandole o alzandole secondo le esigenze
         // (nel caso modificare anche il colore e renderlo meno intenso o di piu)
+        LOG.info("Starting thread lights for heartbeat");
+        final int minutes = 30;
+        final int delta = 15;
+        Runnable runnable = new Runnable() {
+            @Override
+            public synchronized void run() {
+                int sum=0;
+                int count=0;
+                double average;
 
-        Calendar past = Calendar.getInstance();
-        Database instance = Database.getInstance();
-        int sum =0;
-        int count =0;
-        double avg =0;
-        Timestamp twoWeeksAgo ;
+                List<HeartRate> heartRate = database.getHeartDataOfLast(15); //TODO da discriminare l'ora (mi sa che c'è da mettere mano al db
+                Calendar now = Calendar.getInstance();
+                Calendar past = Calendar.getInstance();
+                now.setTimeInMillis(System.currentTimeMillis());
 
-
-        while(true){
-
-            past.setTimeInMillis(System.currentTimeMillis());
-            try {
-
-                past.add(Calendar.DAY_OF_YEAR, -15);
-                twoWeeksAgo = new Timestamp (past.getTimeInMillis());
-
-                ResultSet rs = instance.getDataFromDatabase("SELECT rate FROM heart WHERE day_hour > "+twoWeeksAgo); //TODO da discriminare l'ora (mi sa che c'è da mettere mano al db
-
-                while (rs.next()) {
-                   sum += rs.getDouble("rate");
-                   count ++;
+                for(HeartRate rate: heartRate) {
+                    past.setTimeInMillis(rate.getDate());
+                    if(past.get(Calendar.HOUR_OF_DAY) == now.get(Calendar.HOUR_OF_DAY)) {
+                        sum += rate.getAverage();
+                        count++;
+                    }
                 }
+                average = count!=0? sum/count:0;
 
-                avg = sum/count;
-
-                Fitbit fitBit = new Fitbit();
-                double rateNow = fitBit.getHeartRate(30);
-                if ((rateNow-avg) >= 15 )
-                     lights.decreaseBrightness();
-                    else if ((rateNow-avg) <=-15)
-                        //alzare le luci?
-                        ;
-
-
-                Thread.sleep(1800000);
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
+                double rateNow = fitbit.getHeartRate(minutes);
+                if ((rateNow-average) >= delta )
+                    lights.decreaseBrightness();
+                    //avvisare con una voce registrata?
+                else if ((rateNow-average) <= -delta)
+                    //alzare le luci?
+                    //avvisare con una voce registrata?
+                    ;
             }
-        }
+        };
+
+        Database.getThreadStartingEach(runnable, "lights-with-heartbeat", minutes).start();
     }
 
     // TODO AUTO:{D} Ad una certa ora guarda i passi e se sono pochi dillo
@@ -299,7 +285,7 @@ public class Main {
 
     /A/ Dati del sonno/battito/passi che l'utente puo' richiedere
     XXX Gestione luci secondo le esigenze dell'utente ( settare Dialogflow e server + risolvere bug )
-    /C/ EXTRA Gestione musica tramite comando vocale
+    /C/ Gestione musica tramite comando vocale
 
     // Randomly at night heavy metal start
     */

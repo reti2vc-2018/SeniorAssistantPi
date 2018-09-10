@@ -8,9 +8,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Steps {
+public class Steps extends FitbitData {
 
-	private int steps=0;
+	private int steps = 0;
 	
 	@JsonProperty("activities-steps")
 	public void setSteps(Map<String, String>[] array) {
@@ -22,7 +22,7 @@ public class Steps {
 			if(map.get("dateTime").equals(strDate))
 				steps = Integer.parseInt(map.get("value"));
 	}
-	
-	public int getSteps() { return steps; }
 
+	public void setSteps(int steps) { this.steps = steps; }
+	public int getSteps() { return steps; }
 }
