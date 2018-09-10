@@ -181,4 +181,10 @@ public class Database {
             }
         };
     }
+    public ResultSet getDataFromDatabase(String sql) throws SQLException {
+        Statement statement = conn.createStatement();
+        ResultSet rs = statement.executeQuery(sql);
+        return rs;
+
+    }
 }

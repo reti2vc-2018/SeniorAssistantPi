@@ -5,6 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import support.Database;
 
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -216,6 +220,53 @@ public class Main {
         // controllare che non differiscano di un valore Delta
         // se differiscono di almeno Delta modificare le luci abbassandole o alzandole secondo le esigenze
         // (nel caso modificare anche il colore e renderlo meno intenso o di piu)
+
+        Calendar past = Calendar.getInstance();
+        Database instance = Database.getInstance();
+        int sum =0;
+        int count =0;
+        double avg =0;
+        Timestamp twoWeeksAgo ;
+
+
+        while(true){
+
+            past.setTimeInMillis(System.currentTimeMillis());
+            try {
+
+                past.add(Calendar.DAY_OF_YEAR, -15);
+                twoWeeksAgo = new Timestamp (past.getTimeInMillis());
+
+                ResultSet rs = instance.getDataFromDatabase("SELECT rate FROM heart WHERE day_hour > "+twoWeeksAgo); //TODO da discriminare l'ora (mi sa che c'è da mettere mano al db
+
+                while (rs.next()) {
+                   sum += rs.getDouble("rate");
+                   count ++;
+                }
+
+                avg = sum/count;
+
+                Fitbit fitBit = new Fitbit();
+                double rateNow = fitBit.getHeartRate(30);
+                if ((rateNow-avg) >= 15 )
+                     lights.decreaseBrightness();
+                    else if ((rateNow-avg) <=-15)
+                        //alzare le luci?
+                        ;
+
+
+                Thread.sleep(1800000);
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     // TODO AUTO:{D} Ad una certa ora guarda i passi e se sono pochi dillo
