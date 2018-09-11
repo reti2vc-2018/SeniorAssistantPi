@@ -7,8 +7,12 @@ import java.util.List;
 // TODO implement
 public class RemoteDB implements Database {
 
-    public RemoteDB(String url) {
+    public static final String BASE_URL = "https://localhost:"; //TODO inserire il percorso giusto con la porta
 
+    private final String username;
+
+    public RemoteDB(String username) {
+        this.username = username;
     }
 
     @Override

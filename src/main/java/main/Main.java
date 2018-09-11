@@ -4,10 +4,15 @@ import device.*;
 import device.fitbitdata.HeartRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import support.Musich;
 import support.database.Database;
 import support.database.LocalDB;
 import support.database.RemoteDB;
 
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +22,7 @@ import java.util.regex.Pattern;
 
 /**
  * Created by 20015159 on 28/08/2018.
+ * Ci si puo' interfacciare con l'assistente tramite Telegram o dal sito di ngrok.
  */
 public class Main {
 
@@ -40,11 +46,29 @@ public class Main {
      *     <li>hueUser</li>
      *     <li>sensorNode</li>
      *     <li>sensorLog</li>
-     *     <li>remoteDb</li>
+     *     <li>remoteDbUser</li>
      * </ul>
      * @param args
      */
     public static void main(String[] args) {
+        List<String> urls = Musich.getVideosId("musica rilassante");
+
+        try {
+            String url = Musich.SEARCH_URL + urls.get(0);
+            System.out.println(url);
+            Process p = Runtime.getRuntime().exec(new String[] {"start chrome", "\""  + url + "\"" });
+
+            p.wait( 10 * 1000); // 10 sec
+
+            p.destroy();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if(true)
+            return;
+
         Map<String, String> arguments = getArgsMap(args);
 
         // list of arguments to use in the classes
@@ -52,7 +76,7 @@ public class Main {
         String hueUser = arguments.get("hueUser");
         Integer sensorLog = getInt(arguments.get("sensorLog"));
         Integer sensorNode = getInt(arguments.get("sensorNode"));
-        String remoteDbUrl = arguments.get("remoteDb");
+        String remoteDbUser = arguments.get("remoteDbUser");
 
         try {
             LOG.info("Connessione alle Philips Hue...");
@@ -74,12 +98,11 @@ public class Main {
                 fitbit = new Fitbit();
 
                 LOG.info("Connessione al database...");
-                database = remoteDbUrl==null? new LocalDB():new RemoteDB(remoteDbUrl);
+                database = remoteDbUser==null? new LocalDB():new RemoteDB(remoteDbUser);
 
                 startInsertData();
                 startCheckSteps();
                 startHueControlledByHeartBeat();
-                startWarnIfHeartBeatDrops();
             } catch (Exception e) {
                 LOG.warn("Non e' stato possibile collegarsi al fitbit");
                 e.printStackTrace();
@@ -117,6 +140,8 @@ public class Main {
                 lights.increaseBrightness(params.get("intensity").getAsInt());
             return null;
         });
+        //TODO aggiungere una azione che faccia in modo di richiedere dei dati in particolare
+        //TODO aggiungere una azione su DialogFlow che riconosca di impostare una playlist (Rilassante, Antica...)
 
         LOG.info("Starting Webhook");
         df.startServer();
@@ -209,14 +234,7 @@ public class Main {
         */
     }
 
-    // TODO AUTO:{C} Gestione luci a seconda del battito cardiaco
     private static void startHueControlledByHeartBeat() {
-        // ad ogni X minuti:
-        // prendere la media di battiti di quell'ora dal DB
-        // prendere dal fitbit i valori degli ultimi X minuti
-        // controllare che non differiscano di un valore Delta
-        // se differiscono di almeno Delta modificare le luci abbassandole o alzandole secondo le esigenze
-        // (nel caso modificare anche il colore e renderlo meno intenso o di piu)
         LOG.info("Starting thread lights for heartbeat");
         final int minutes = 30;
         final int delta = 15;
@@ -227,7 +245,7 @@ public class Main {
                 int count=0;
                 double average;
 
-                List<HeartRate> heartRate = database.getHeartDataOfLast(15); //TODO da discriminare l'ora (mi sa che c'è da mettere mano al db
+                List<HeartRate> heartRate = database.getHeartDataOfLast(15);
                 Calendar now = Calendar.getInstance();
                 Calendar past = Calendar.getInstance();
                 now.setTimeInMillis(System.currentTimeMillis());
@@ -241,6 +259,7 @@ public class Main {
                 }
                 average = count!=0? sum/count:0;
 
+                //TODO impostare azioni anche di {E}
                 double rateNow = fitbit.getHeartRate(minutes);
                 if ((rateNow-average) >= delta )
                     lights.decreaseBrightness();
@@ -263,23 +282,14 @@ public class Main {
         // (secondo me si puo' evitare)
     }
 
-    // TODO AUTO:{E} Se i battiti sono troppo bassi/alti avvisare il tizio
-    private static void startWarnIfHeartBeatDrops() {
-        // controllare gli ultimi X minuti del fitbit
-        // tenersi una lista degli ultimi Y risultati
-        // controllare l'andamento dei battiti
-        // se troppo bassi o alti secondo un Delta, allora inviare un messaggio (DialogFlow?)
-        // (e' possibile integrarlo con la gestione delle luci tramite il battito)
-    }
-
     /*
-    TODO AUTOMATIC: {B}, {C}, {D}, {E}
+    TODO AUTOMATIC: {B}, {D}
 
     XXX Gestione DB in modo che si aggiorni ogni ora
     /B/ Gestione luci in modo che la luminosità sia sempre la stessa
-    /C/ Gestione luci a seconda del battito cardiaco
+    XXX Gestione luci a seconda del battito cardiaco
     /D/ Ad una certa ora guarda i passi e se sono pochi dillo
-    /E/ Se i battiti sono troppo bassi/alti avvisare il tizio
+    XXX Se i battiti sono troppo bassi/alti avvisare il tizio
 
     TODO USER-INTERACTION {A}, {C}
 

@@ -85,7 +85,7 @@ public interface Database {
             }
         };
 
-        return getThreadStartingEach(runnable, "update-hourly-data", 1);
+        return getThreadStartingEach(runnable, "update-hourly-data", 60);
     }
 
     /**

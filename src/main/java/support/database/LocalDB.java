@@ -54,17 +54,35 @@ public class LocalDB implements Database {
 
     @Override
     public boolean updateHeart(long dateMilliSec, double heartRate) {
-        return query("INSERT INTO heart (day, rate) VALUES ( ' " + new Timestamp(dateMilliSec) + " ', '" + heartRate + "')");
+        Timestamp time = new Timestamp(dateMilliSec);
+        return query("IF NOT EXISTS (" +
+                "SELECT * " +
+                "FROM heart " +
+                "WHERE day = '" + time + "') " +
+                "BEGIN INSERT INTO heart (day, rate) VALUES ( ' " + time + " ', '" + heartRate + "') " +
+                "END;");
     }
 
     @Override
     public boolean updateSleep(long dateStartSleep, long duration) {
-        return query("INSERT INTO sleep (sleep_start, duration) VALUES ( ' " + new Timestamp(dateStartSleep) + " ', '" + duration + "')");
+        Timestamp time = new Timestamp(dateStartSleep);
+        return query("IF NOT EXISTS (" +
+                "SELECT * " +
+                "FROM sleep " +
+                "WHERE sleep_start = '" + time + "') " +
+                "BEGIN INSERT INTO sleep (sleep_start, duration) VALUES ( ' " + time + " ', '" + duration + "') " +
+                "END;");
     }
 
     @Override
     public boolean updateSteps(long dateMilliSec, long steps) {
-        return query("INSERT INTO steps (day, steps) VALUES ( ' " + new Timestamp(dateMilliSec) + " ', '" + steps + "')");
+        Timestamp time = new Timestamp(dateMilliSec);
+        return query("IF NOT EXISTS (" +
+                "SELECT * " +
+                "FROM steps " +
+                "WHERE day = '" + time + "') " +
+                "INSERT INTO steps (day, steps) VALUES ( ' " + time + " ', '" + steps + "') " +
+                "END;");
     }
 
     @Override
@@ -75,7 +93,7 @@ public class LocalDB implements Database {
 //            calendar.setTimeInMillis(System.currentTimeMillis());
 //            calendar.add(Calendar.DATE, -dayToSubtract);
 //            long time = calendar.getTimeInMillis();
-            long time = System.currentTimeMillis() - (dayToSubtract * 24 * 60 * 1000); // meno 24 giorni per 60 secondi per 100 millisec
+            long time = System.currentTimeMillis() - (dayToSubtract * 24 * 60 * 1000); // meno 24 ore per 60 secondi per 100 millisec
 
             ResultSet result = conn.createStatement().executeQuery("SELECT * FROM heart WHERE day>='" + new Timestamp(time) + "'");
             List<HeartRate> list = new LinkedList<>();
