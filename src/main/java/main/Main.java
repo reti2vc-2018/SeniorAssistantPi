@@ -9,10 +9,6 @@ import support.database.Database;
 import support.database.LocalDB;
 import support.database.RemoteDB;
 
-import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +31,7 @@ public class Main {
     private static Fitbit fitbit = null;
     private static Sensor sensor = null;
     private static Database database = null;
+    private static Musich musich = null;
 
     /**
      * Funzione principale, qui si  creano tutte le classi che verranno utilizzate.<br>
@@ -51,24 +48,6 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) {
-        List<String> urls = Musich.getVideosId("musica rilassante");
-
-        try {
-            String url = Musich.SEARCH_URL + urls.get(0);
-            System.out.println(url);
-            Process p = Runtime.getRuntime().exec(new String[] {"start chrome", "\""  + url + "\"" });
-
-            p.wait( 10 * 1000); // 10 sec
-
-            p.destroy();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if(true)
-            return;
-
         Map<String, String> arguments = getArgsMap(args);
 
         // list of arguments to use in the classes
