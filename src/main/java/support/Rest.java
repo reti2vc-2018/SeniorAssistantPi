@@ -53,6 +53,7 @@ public class Rest {
             // should be inside a finally...
             result.close();
             httpclient.close();
+            LOG.debug("GET response: " + json);
         } catch (IOException e) {
             LOG.error("GET: " + e.getMessage());
         }

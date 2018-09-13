@@ -22,10 +22,10 @@ public class Musich {
      */
     private static final String API_URL = "https://www.googleapis.com/youtube/v3/search?";
     /**
-     * La key necessaria per prendere i dati da youtube, (per ora abbiamo usato la key di Dawit di SeniorAssistant)<br>
+     * La key necessaria per prendere i dati da youtube<br>
      * Tra l'altro l'ho presa a caso... quindi boh.
      */
-    private static final String KEY = "AIzaSyCtCK0EPR3k_hEEyar0PeY5v9E9UyTX4TM";
+    private static final String KEY = "AIzaSyAYcQcX9P5btBTfgdwWwETNh_7jV20cQp0";
 
     /**
      * IL thread che ha fatto partire il frame corrente

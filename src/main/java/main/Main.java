@@ -31,7 +31,7 @@ public class Main {
     private static Fitbit fitbit = null;
     private static Sensor sensor = null;
     private static Database database = null;
-    private static Musich musich = null;
+    private static Musich musich = new Musich();
 
     /**
      * Funzione principale, qui si  creano tutte le classi che verranno utilizzate.<br>
@@ -48,6 +48,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) {
+        System.getProperty("sun.arch.data.model");
         Map<String, String> arguments = getArgsMap(args);
 
         // list of arguments to use in the classes
@@ -100,11 +101,17 @@ public class Main {
     private static void startWebhook() {
         DialogFlowWebHook df = new DialogFlowWebHook();
 
-        df.addOnAction("LightsON", (params) -> {lights.turnOn(); return null;});
-        df.addOnAction("LightsOFF", (params) -> {lights.turnOff(); return null;});
-        df.addOnAction("ColorLoop", (params) -> {lights.colorLoop(); return null;});
-        df.addOnAction("ChangeColor", (params) -> {lights.changeColor(params.get("color").getAsString()); return null;});
-        df.addOnAction("SetLights", (params) -> {lights.setBrightness(params.get("intensity").getAsInt()); return null;});
+        df.addOnAction("LightsON", (params) -> { lights.turnOn(); return null; });
+        df.addOnAction("LightsOFF", (params) -> { lights.turnOff(); return null; });
+        df.addOnAction("ColorLoop", (params) -> { lights.colorLoop(); return null; });
+        df.addOnAction("ChangeColor", (params) -> {
+            lights.changeColor(params.get("color").getAsString());
+            return null;
+        });
+        df.addOnAction("SetLights", (params) -> {
+            lights.setBrightness(params.get("intensity").getAsInt());
+            return null;
+        });
         df.addOnAction("LightsDOWN", (params) -> {
             if(params.get("intensity").getAsString().equals(""))
                 lights.decreaseBrightness();
@@ -119,6 +126,12 @@ public class Main {
                 lights.increaseBrightness(params.get("intensity").getAsInt());
             return null;
         });
+        df.addOnAction("SetMusic", (param) -> {
+            musich.playRandom(param.get("musicType").getAsString(),10);
+            return null;
+        });
+        df.addOnAction("StopMusic", (params) -> { musich.stop(); return null; });
+
         //TODO aggiungere una azione che faccia in modo di richiedere dei dati in particolare
         //TODO aggiungere una azione su DialogFlow che riconosca di impostare una playlist (Rilassante, Antica...)
 
