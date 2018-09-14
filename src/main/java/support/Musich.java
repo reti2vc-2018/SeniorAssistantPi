@@ -94,7 +94,8 @@ public class Musich {
     }
 
     /**
-     * Dato l'id di un video viene fatta partire un frame contenente il video richiesto
+     * Dato l'id di un video viene fatta partire un frame contenente il video richiesto<br>
+     * Come al solito, youtube potrebbe far partire una pubblicita'... eh beh.
      * @param videoId l'id del video da far vedere
      * @param seconds da quanti secondi bisogna far partire il video
      */
@@ -123,7 +124,8 @@ public class Musich {
     }
 
     /**
-     * Dato l'id di un video viene fatta partire un frame contenente il video richiesto
+     * Dato l'id di un video viene fatta partire un frame contenente il video richiesto<br>
+     * Come al solito, youtube potrebbe far partire una pubblicita'... eh beh.
      * @param videoId l'id del video da far vedere
      */
     public void play(final String videoId) {
@@ -131,7 +133,8 @@ public class Musich {
     }
 
     /**
-     * Serve a far partire un video a caso tra quelli che corrispondono alle keyword indicate nella ricerca
+     * Serve a far partire un video a caso tra quelli che corrispondono alle keyword indicate nella ricerca<br>
+     * Come al solito, youtube potrebbe far partire una pubblicita'... eh beh.
      * @param search la ricerca da fare su youtube
      * @param maxResult fra quanti risultati deve scegliere
      */

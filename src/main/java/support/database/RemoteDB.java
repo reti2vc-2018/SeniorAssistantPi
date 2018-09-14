@@ -1,23 +1,31 @@
 package support.database;
 
 import device.fitbitdata.HeartRate;
+import support.Rest;
 
 import java.util.List;
+import java.util.Map;
 
 // TODO implement
 public class RemoteDB implements Database {
 
-    public static final String BASE_URL = "https://localhost:"; //TODO inserire il percorso giusto con la porta
-
+    private final String base_url;
     private final String username;
 
     public RemoteDB(String username) {
+        this(username, "http://127.0.0.1:5001/api/");
+    }
+
+    public RemoteDB(String username, String base_url) {
         this.username = username;
+        this.base_url = base_url;
     }
 
     @Override
     public boolean isReachable() {
-        return false;
+        Map<String, ?> map = Rest.get(base_url+"user/");
+        LOG.info(map.toString());
+        return !map.isEmpty();
     }
 
     @Override

@@ -6,8 +6,10 @@ import device.fitbitdata.Sleep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Timestamp;
 import java.util.List;
+
+import static main.VariousThreads.MILLISEC_IN_MINUTE;
+import static main.VariousThreads.getThreadStartingEach;
 
 public interface Database {
 
@@ -15,11 +17,6 @@ public interface Database {
      * Un logger per scrivere a console eventuali errori o informazioni
      */
     Logger LOG = LoggerFactory.getLogger("DB");
-
-    /**
-     * Una costante che indica quanti millisecondi ci sono in un minuto (utile per le conversioni)
-     */
-    int MILLISEC_IN_MINUTE = 60000;
 
     /**
      * Dice solamente se e' possibile collegarsi al database e se si possono fare delle query
@@ -85,7 +82,7 @@ public interface Database {
             }
         };
 
-        return getThreadStartingEach(runnable, "update-hourly-data", 60);
+        return getThreadStartingEach(runnable, 60, "update-hourly-data");
     }
 
     /**
@@ -121,36 +118,6 @@ public interface Database {
             }
         };
 
-        return getThreadStartingEach(runnable, "update-daily-data", 24*60);
-    }
-
-    /**
-     * Restuisce un thread che se fatto partire, esegue il runnable in un sub-thread ogni X minuti<br>
-     * Il sotto thread lanciato avra' lo stesso nome, ma con un trattino e la data di lancio a seguito<br>
-     * Se il thread viene interrotto non fa piu' partire il runnable e si ferma
-     * @param runnable il runnable da lanciare
-     * @param threadName il nome da dare al thread
-     * @param minutes i minuti da aspettare, se negativi o 0 ritorna null
-     */
-    static Thread getThreadStartingEach(final Runnable runnable, String threadName, int minutes) {
-        if(minutes<1)
-            return null;
-
-        return new Thread(new Runnable() {
-            @Override
-            public synchronized void run() {
-                boolean notInterrupted = true;
-                do {
-                    try {
-                        wait(minutes * MILLISEC_IN_MINUTE);
-                        Thread thread = new Thread(runnable, threadName + "-" + new Timestamp(System.currentTimeMillis()));
-                        thread.start();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        notInterrupted = false;
-                    }
-                } while (notInterrupted);
-            }
-        }, threadName);
+        return getThreadStartingEach(runnable, 24*60, "update-daily-data");
     }
 }
