@@ -18,7 +18,6 @@ import de.fh_zwickau.informatik.sensor.model.profiles.ProfileList;
 import de.fh_zwickau.informatik.sensor.model.zwaveapi.controller.ZWaveController;
 import de.fh_zwickau.informatik.sensor.model.zwaveapi.devices.ZWaveDevice;
 import device.Sensor;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -5,27 +5,30 @@ import device.Fitbit;
 import device.Hue;
 import device.Sensor;
 import device.fitbitdata.HeartRate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import support.Musich;
 import support.database.Database;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class VariousThreads {
-
-    /**
-     * Un Logger per capire meglio quali pezzi vengono eseguiti e quali no.
-     */
-    public static final Logger LOG = LoggerFactory.getLogger("SeniorAssistant");
 
     /**
      * Una costante che indica quanti millisecondi ci sono in un minuto (utile per le conversioni)
      */
     public static final int MILLISEC_IN_MINUTE = 60000;
 
+    /**
+     * Quanti minuti di cooldown da impostare dopo che l'utente ha chiesto di modificare le luci
+     */
+    private static final int COOLDOWN_IN_MINUTES = 20;
+
+    /**
+     * Variabile che serve ad impostare un cooldown per la luminosita' automatica
+     */
+    private final AtomicInteger cooldown = new AtomicInteger(0);
 
     /**
      * La variabile per far partire della musica da Youtube
@@ -47,8 +50,8 @@ public class VariousThreads {
     public void startWebhook(final Hue lights) {
         DialogFlowWebHook df = new DialogFlowWebHook();
 
-        df.addOnAction("LightsON", (params) -> { lights.turnOn(); return null; });
-        df.addOnAction("LightsOFF", (params) -> { lights.turnOff(); return null; });
+        df.addOnAction("LightsON", (params) -> { lights.turnOn(); cooldown.set(COOLDOWN_IN_MINUTES); return null; });
+        df.addOnAction("LightsOFF", (params) -> { lights.turnOff(); cooldown.set(COOLDOWN_IN_MINUTES); return null; });
         df.addOnAction("ColorLoop", (params) -> { lights.colorLoop(); return null; });
         df.addOnAction("ChangeColor", (params) -> {
             lights.changeColor(params.get("color").getAsString());
@@ -56,6 +59,7 @@ public class VariousThreads {
         });
         df.addOnAction("SetLights", (params) -> {
             lights.setBrightness(params.get("intensity").getAsInt());
+            cooldown.set(COOLDOWN_IN_MINUTES);
             return null;
         });
         df.addOnAction("LightsDOWN", (params) -> {
@@ -63,6 +67,7 @@ public class VariousThreads {
                 lights.decreaseBrightness();
             else
                 lights.decreaseBrightness(params.get("intensity").getAsInt());
+            cooldown.set(COOLDOWN_IN_MINUTES);
             return null;
         });
         df.addOnAction("LightsUP", (params) -> {
@@ -70,6 +75,7 @@ public class VariousThreads {
                 lights.increaseBrightness();
             else
                 lights.increaseBrightness(params.get("intensity").getAsInt());
+            cooldown.set(COOLDOWN_IN_MINUTES);
             return null;
         });
         df.addOnAction("SetMusic", (param) -> {
@@ -82,7 +88,7 @@ public class VariousThreads {
         //TODO aggiungere una azione su DialogFlow che riconosca di impostare una playlist (Rilassante, Antica...)
 
         df.startServer();
-        LOG.info("Webhook partito");
+        SeniorAssistant.LOG.info("Webhook partito");
     }
 
     /**
@@ -99,13 +105,12 @@ public class VariousThreads {
 
             hourlyData.start();
             dailyData.start();
-            LOG.info("Thread per gli aggiornamenti automatici partiti");
+            SeniorAssistant.LOG.info("Thread per gli aggiornamenti automatici partiti");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // TODO fare auto-brightness
     /**
      * Gestione delle luci in modo che cambiano la luminosita' in base ai dati ricevuti dal sensore<br>
      * Se l'utente pero' cambia il valore delle luci di sua volonta', il processo non modifichera' le luci per almeno un'ora.
@@ -113,55 +118,29 @@ public class VariousThreads {
      * @param sensor i sensori da cui porendere i dati
      */
     public void startHueAutoBrightness(final Hue lights, final Sensor sensor) {
-        // controllare la luminosita' arrivata dal sensore
-        // trovare un valore di default per ogni ora
-        // se troppo bassa alzare la luci di poco
-        // se troppo alta abbassare le luci
-        // se l'utente modifica la luminosita' delle luci allora non fare nulla per almeno 20/30 minuti o di piu
-        /*
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public synchronized void run() {
-                boolean notInterrupted = true;
-                Calendar calendar = Calendar.getInstance();
-                while(notInterrupted) {
-                    int bright = sensor.getBrightnessLevel();
-                    int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        final int minute = 1;
+        final int minBrightness = 20; // valore che va da 0 a 100
+        Calendar calendar = Calendar.getInstance();
 
-                    if(hour >= 21 && hour<7) {
-                        lights.setBrightness(5);
-                    }
-                    else if(hour >= 19 && hour<21) {
-                        lights.setBrightness(99);
-                    }
-                    else if(hour >= 7 && hour<19) {
-                        lights.setBrightness(0);
-                    }
+        Thread thread = getThreadStartingEach(() -> {
+            if(cooldown.addAndGet(-minute) <= 0) {
+                calendar.setTimeInMillis(System.currentTimeMillis());
 
-                    try {
-                        wait(120000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        notInterrupted = false;
-                    }
+                // puo' avere un valore compreso tra -1 e 1
+                final double brightFactor =
+                    calculateBrightFactor(
+                        calendar.get(Calendar.HOUR_OF_DAY),
+                        calendar.get(Calendar.MINUTE),
+                        sensor.getBrightnessLevel()/10,
+                        minBrightness
+                    );
 
-                    if(hour >= 21 && hour<7)
-                        lights.setBrightness(5);
-                    else if(bright >= 0 && bright <= 20)
-                        lights.setBrightness(90);
-                    else if(bright >= 21 && bright <= 40)
-                        lights.setBrightness(60);
-                    else if(bright >= 41 && bright <= 60)
-                        lights.setBrightness(40);
-                    else
-                        lights.turnOff();
-
-                }
+                lights.addBrightness(brightFactor*100);
             }
-        }, "auto-brightness");
+        }, minute, "auto-brightness");
 
         thread.start();
-        */
+        SeniorAssistant.LOG.info("Thread per l'impostazione automatica della luminosita' partito");
     }
 
     /**
@@ -174,10 +153,10 @@ public class VariousThreads {
     public void startHueControlledByHeartBeat(final Hue lights, final Fitbit fitbit, final Database database) {
         final int minutes = 30;
         final int delta = 15;
-        Runnable runnable = new Runnable() {
+        Thread thread = getThreadStartingEach(new Runnable() {
             @Override
             public synchronized void run() {
-                int sum=0;
+                double sum=0;
                 int count=0;
                 double average;
 
@@ -205,10 +184,10 @@ public class VariousThreads {
                     //avvisare con una voce registrata?
                     ;
             }
-        };
+        }, minutes, "lights-with-heartbeat");
 
-        getThreadStartingEach(runnable, minutes, "lights-with-heartbeat").start();
-        LOG.info("Thread per il controllo delle luci tramite il battito cardiaco partito");
+        thread.start();
+        SeniorAssistant.LOG.info("Thread per il controllo delle luci tramite il battito cardiaco partito");
     }
 
     // TODO Ad una certa ora guarda i passi e se sono pochi dillo
@@ -227,6 +206,31 @@ public class VariousThreads {
 
 
 
+    /**
+     * Calcola un numero compreso fra -1 e 1 che indica se c'e' bisogno o meno di luminosita'<br>
+     * Se i valori inseriti sono maggiori o minori di quelli consentiti, allora verranno limitati<br>
+     * ovvero se sono minori del minimo esso diventera' il minimo, stessa cosa con il massimo.
+     * @param hour l'ora corrente (valore da 0 a 23)
+     * @param minutes i minuti correnti (valore da 0 a 59)
+     * @param sensorBright la liminosita' segnata dal sensore (valore da 0 a 100)
+     * @param minBrightness la luminosita' minima che si vuole avere (valore da 0 a 100)
+     * @return un valore indicante quanta luminosita' si ha bisogno nell'ora indicata e con la luminosita' indicata
+     */
+    public static double calculateBrightFactor(int hour, int minutes, double sensorBright, double minBrightness) {
+        hour = hour<0? 0:hour>23? 23:hour;
+        minutes = minutes<0? 0:minutes>59? 59:minutes;
+        minBrightness = minBrightness<0? 0:minBrightness>100? 100:minBrightness;
+        sensorBright = sensorBright<0? 0:sensorBright>100? 100:sensorBright;
+
+        // Valore compreso tra -1(poca luminosita') e 1(molta luminosita')
+        sensorBright = sensorBright/100;
+        minBrightness = 0.5*Math.abs(1-minBrightness/100);
+
+        // Puo' avere un valore compreso tra 1(mezzanotte) e 0(mezzogiorno) => il valore minimo(0) puo' aumentare grazie a minBrightness)
+        final double maxIntensity = minBrightness*Math.cos((2*Math.PI*(hour + (minutes/60.0)) /24)) + (1-minBrightness);
+
+        return maxIntensity-sensorBright;
+    }
 
     /**
      * Restuisce un thread che se fatto partire, esegue il runnable in un sub-thread ogni X minuti<br>

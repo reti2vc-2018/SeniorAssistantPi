@@ -1,13 +1,14 @@
 package device;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import ai.api.GsonFactory;
+import com.google.common.util.concurrent.AtomicDouble;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import support.Rest;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Classe che permette di controllare le luci Philips Hue
@@ -22,12 +23,12 @@ public class Hue {
     /**
      * La luminopsita' massima a cui si puo' arrivare
      */
-    public static final int MAX_BRIGHTNESS = 254;
+    private static final int MAX_BRIGHTNESS = 254;
 
     /**
      * Una mappa che ad ogni colore (in lingua ita) assegna il proprio valore in hue
      */
-    public static final Map<String, Double[]> COLORS = new HashMap<>();
+    private static final Map<String, Double[]> COLORS = new HashMap<>();
 
 	/**
 	 * L'url in cui si possono trovare le luci
@@ -42,11 +43,9 @@ public class Hue {
     /**
      * L'ultima luminosita' impostata
      */
-    private double brightness = 0;
+    private final AtomicDouble brightness = new AtomicDouble(0);
 
-    /**
-     * Riempimento della mappa con i vari colori
-     */
+    // Riempimento della mappa con i vari colori
     static {
         COLORS.put("giall[oae]", new Double[]{0.45, 0.45});
         COLORS.put("ross[oae]", new Double[]{0.7, 0.25});
@@ -96,7 +95,7 @@ public class Hue {
         map.put("hue", (int)hue);
         setState(map);
 
-        brightness = (bri*MAX_BRIGHTNESS)/100;
+        brightness.set((bri*MAX_BRIGHTNESS)/100);
     }
 
     /**
@@ -134,9 +133,9 @@ public class Hue {
     
     /**
      * Ritorna la liminosita' attuale delle luci controllate
-     * @return
+     * @return il valore e' compreso tra 0 e 100
      */
-    public double getCurrentBrightness() { return brightness; }
+    public double getCurrentBrightness() { return brightness.doubleValue(); }
     
     /**
      * Modifica la luminosita' delle luci a seconda del valore inserito
@@ -149,7 +148,15 @@ public class Hue {
     	    num=100;
 
     	setState("bri", (int) (num*MAX_BRIGHTNESS)/100 );
-        brightness = num;
+        brightness.set(num);
+    }
+
+    /**
+     * Aggiunge il valore delta alla luminosita' corrente delle luci.
+     * @param delta un qualsiasi numero che va da -100 a 100
+     */
+    public void addBrightness(double delta) {
+        setBrightness(brightness.doubleValue() + delta);
     }
 
     /**
@@ -161,7 +168,7 @@ public class Hue {
             percentage = 0;
         else if (percentage>100)
             percentage = 100;
-        setBrightness(brightness + percentage);
+        setBrightness(brightness.doubleValue() + percentage);
     }
 
     /**
@@ -178,7 +185,7 @@ public class Hue {
             percentage = 0;
         else if (percentage>100)
             percentage = 100;
-        setBrightness(brightness - percentage);
+        setBrightness(brightness.doubleValue() - percentage);
     }
 
     /**
@@ -226,7 +233,7 @@ public class Hue {
      * Invia una richiesta a tutte le luci hue con gli attributi selezionati ed il loro valore
      * @param attributes una mappa di attributi -> valori
      */
-    public void setState(Map<String, Object> attributes) {
+    public synchronized void setState(Map<String, Object> attributes) {
         String body = GsonFactory.getDefaultFactory().getGson().toJson(attributes);
         LOG.info("Setting: " + body);
         for (String light : allLights.keySet()) {

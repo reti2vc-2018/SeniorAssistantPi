@@ -1,11 +1,6 @@
 package support;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gson.Gson;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -16,6 +11,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Una classe generica che invia delle richieste Rest e le parsifica nel JSON corrispondente

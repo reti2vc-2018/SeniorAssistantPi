@@ -1,6 +1,10 @@
 package main;
 
-import device.*;
+import device.Fitbit;
+import device.Hue;
+import device.Sensor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import support.database.Database;
 import support.database.LocalDB;
 import support.database.RemoteDB;
@@ -17,6 +21,11 @@ import java.util.regex.Pattern;
 public class SeniorAssistant {
 
     /**
+     * Un Logger per capire meglio quali pezzi vengono eseguiti e quali no.
+     */
+    public static final Logger LOG = LoggerFactory.getLogger("SeniorAssistant");
+
+    /**
      * Funzione principale, qui si  creano tutte le classi che verranno utilizzate.<br>
      * Si possono passare dei parametri usando -(nome parametro)::(valore parametro)<br>
      * Ogni parametro deve esser separato da uno o piu spazi<br>
@@ -25,6 +34,7 @@ public class SeniorAssistant {
      *     <li>hueAddress</li>
      *     <li>hueUser</li>
      *     <li>sensorAddress</li>
+     *     <li>autoBrightness</li>
      *     <li>sensorNode</li>
      *     <li>remoteDbUser</li>
      * </ul>
@@ -35,57 +45,58 @@ public class SeniorAssistant {
         Map<String, String> arguments = getArgsMap(args);
 
         // list of arguments to use in the classes
-        String hueAddress = arguments.get("hueAddress");
-        String hueUser = arguments.get("hueUser");
+        String hueAddress = arguments.get("hueaddress");
+        String hueUser = arguments.get("hueuser");
         //TODO String sensorAddress = arguments.get("sensorAddress");
-        Integer sensorNode = getInt(arguments.get("sensorNode"));
-        String remoteDbUser = arguments.get("remoteDbUser");
+        Integer sensorNode = getInt(arguments.get("sensornode"));
+        String remoteDbUser = arguments.get("remotedbuser");
+        boolean autoBrightness = arguments.containsKey("autobrightness");
 
         try {
-            VariousThreads.LOG.info("Connessione alle Philips Hue...");
+            LOG.info("Connessione alle Philips Hue...");
             Hue lights = new Hue(hueAddress, hueUser);
 
-            try {
-                VariousThreads.LOG.info("Connessione ai sensori...");
+            if(autoBrightness) try {
+                LOG.info("Connessione ai sensori...");
                 Sensor sensor = new Sensor(sensorNode);
 
                 threads.startHueAutoBrightness(lights, sensor);
             } catch (Exception e) {
-                VariousThreads.LOG.warn(e.getMessage());
+                LOG.warn(e.getMessage());
             }
 
             try {
-                VariousThreads.LOG.info("Connessione al Fitbit, ignorare eventuale errore per setPermissionsToOwnerOnly...");
+                LOG.info("Connessione al Fitbit, ignorare eventuale errore per setPermissionsToOwnerOnly...");
                 Fitbit fitbit = new Fitbit();
 
-                VariousThreads.LOG.info("Connessione al database...");
+                LOG.info("Connessione al database...");
                 Database database = remoteDbUser == null ? new LocalDB() : new RemoteDB(remoteDbUser);
 
                 threads.startInsertData(database, fitbit);
                 threads.startHueControlledByHeartBeat(lights, fitbit, database);
                 threads.startCheckSteps(fitbit);
             } catch (Exception e) {
-                VariousThreads.LOG.warn("Non e' stato possibile collegarsi al fitbit");
+                LOG.warn("Non e' stato possibile collegarsi al fitbit");
                 e.printStackTrace();
             }
 
             threads.startWebhook(lights);
         } catch (Exception e) {
-            VariousThreads.LOG.error(e.getMessage());
+            LOG.error(e.getMessage());
         }
-        VariousThreads.LOG.info("FINE MAIN");
+        LOG.info("FINE MAIN");
     }
 
     /*
-    TODO AUTOMATIC: {B}, {D}
+    TODO AUTOMATIC: {D}
 
     XXX Gestione DB in modo che si aggiorni ogni ora
-    /B/ Gestione luci in modo che la luminosità sia sempre la stessa
+    XXX Gestione luci in modo che la luminosità sia sempre la stessa
     XXX Gestione luci a seconda del battito cardiaco
-    /D/ Ad una certa ora guarda i passi e se sono pochi dillo
+    /D/ Ogni X ore/minuti guarda i passi e se sono pochi dillo
     XXX Se i battiti sono troppo bassi/alti avvisare il tizio
 
-    TODO USER-INTERACTION {A}, {C}
+    TODO USER-INTERACTION {A}
 
     /A/ Dati del sonno/battito/passi che l'utente puo' richiedere
     XXX Gestione luci secondo le esigenze dell'utente ( settare Dialogflow e server + risolvere bug )
@@ -118,7 +129,7 @@ public class SeniorAssistant {
         for (String arg: args) {
             Matcher matcher = pattern.matcher(arg);
             if (matcher.find())
-                map.put(matcher.group(1), matcher.group(2));
+                map.put(matcher.group(1).toLowerCase(), matcher.group(2));
         }
         return map;
     }

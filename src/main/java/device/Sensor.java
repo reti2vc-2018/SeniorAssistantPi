@@ -80,29 +80,24 @@ public class Sensor {
 
     /**
      * Legge i valori della luminosita' segnata dai dispositivi e ne ritorna il valore
-     * @return la luminopsita' segnata dai dispositivi
+     * @return la luminosita' segnata dai dispositivi (da 0 a 100)
      */
-    public int getBrightnessLevel() {
+    public double getBrightnessLevel() {
+        update();
         for (Device device : devices.getAllDevices())
-        if (device.getMetrics().getProbeTitle().equalsIgnoreCase("luminiscence"))
-            return Integer.parseInt(device.getMetrics().getLevel());
-        return -99;
+            if (device.getMetrics().getProbeTitle().equalsIgnoreCase("luminiscence"))
+                return Double.parseDouble(device.getMetrics().getLevel())/10;
+        return 0;
     }
 
     /**
      * Fa in modo di forzare l'aggiornamento dei dispositivi
-     * @param timeout fa aspettare un tot di tempo prima di provare a forzare e dopo l'aggiornameto
      */
-    synchronized public void update(int timeout) {
-        try {
-            wait(timeout / 2);
-            for (Device device : devices.getAllDevices())
-                try {
-                    device.update();
-                } catch (Exception e) { }
-
-            wait(timeout / 2);
-        } catch (InterruptedException e) { }
+    synchronized private void update() {
+        for (Device device : devices.getAllDevices())
+            try {
+                device.update();
+            } catch (Exception e) { }
     }
     /*
     public boolean IsLowLuminescence(int Luminescence) {

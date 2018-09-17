@@ -3,7 +3,6 @@ package device.fitbitdata;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public class Sleep {
         public final long start_date;
         public final long duration;
 
-        public SleepData(Date start_date, long duration) {
+        SleepData(Date start_date, long duration) {
             this.start_date = start_date.getTime();
             this.duration = duration;
         }

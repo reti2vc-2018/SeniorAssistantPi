@@ -8,17 +8,16 @@ import java.util.HashSet;
 import java.util.Set;
 
  public class TestSensor {
-    Sensor sensor = new Sensor(2);
-     Hue lights;
+    private Sensor sensor = new Sensor(2);
+     private Hue lights;
 
     @Test
-     synchronized public void firstTestSensor() throws InterruptedException {
-        sensor.update(2);
+     synchronized public void firstTestSensor() {
         System.out.println(sensor.getBrightnessLevel());
     }
 
     @Test
-    synchronized public void secondTestSensor() throws InterruptedException {
+    synchronized public void secondTestSensor() {
         int i=0;
         lights = new Hue();
         Set<String> toRemove = new HashSet<>();
@@ -39,7 +38,6 @@ import java.util.Set;
                 lights.setBrightness(0);
             }
             System.out.println(i+"-"+sensor.getBrightnessLevel());
-            sensor.update(100);
             i++;
         }
     }
