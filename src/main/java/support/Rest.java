@@ -1,6 +1,7 @@
 package support;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,21 +39,26 @@ public class Rest {
      * @return the response, parsed from JSON
      */
     public static Map<String, ?> get(String URL) {
-        Map<String, ?> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
+        String json = "";
 
         try {
             CloseableHttpClient httpclient = HttpClients.createDefault();
             HttpGet request = new HttpGet(URL);
             CloseableHttpResponse result = httpclient.execute(request);
-            String json = EntityUtils.toString(result.getEntity());
+            json = EntityUtils.toString(result.getEntity());
 
-            response = gson.fromJson(json, Map.class);
+            try {
+                response = gson.fromJson(json, Map.class);
+            } catch (JsonSyntaxException e) {
+                response.put("list", gson.fromJson(json, List.class));
+            }
+
             result.close();
-
             httpclient.close();
             LOG.debug("GET response: " + json);
         } catch (Exception e) {
-            LOG.error("GET: " + e.getMessage());
+            LOG.error("GET: " + URL + " " + e.getMessage() + " " + json);
         }
 
 
@@ -75,8 +82,10 @@ public class Rest {
             request.setEntity(params);
 
             HttpResponse result = httpclient.execute(request);
-
+            String json = EntityUtils.toString(result.getEntity());
             httpclient.close();
+
+            LOG.debug("PUT response: " + json);
         } catch (Exception e) {
             LOG.error("PUT: " + e.getMessage());
         }

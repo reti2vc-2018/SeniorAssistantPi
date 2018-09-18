@@ -5,7 +5,9 @@ import device.Fitbit;
 import device.Hue;
 import device.Sensor;
 import device.fitbitdata.HeartRate;
-import support.Musich;
+import support.audio.Audio;
+import support.audio.AudioFile;
+import support.audio.Musich;
 import support.database.Database;
 
 import java.sql.Timestamp;
@@ -33,13 +35,14 @@ public class VariousThreads {
     /**
      * La variabile per far partire della musica da Youtube
      */
-    private final Musich musich;
+    private final Audio audio;
 
     /**
      * Costruttore
      */
     public VariousThreads() {
-        musich = new Musich();
+        // audio = new AudioFile();
+        audio = System.getProperty("os.name").startsWith("Windows")? new Musich():new AudioFile();
     }
 
     // TODO aggingere il fitbit per la richiesta dei dati
@@ -79,10 +82,10 @@ public class VariousThreads {
             return null;
         });
         df.addOnAction("SetMusic", (param) -> {
-            musich.playRandom(param.get("musicType").getAsString(),10);
+            audio.playRandom(param.get("musicType").getAsString());
             return null;
         });
-        df.addOnAction("StopMusic", (params) -> { musich.stop(); return null; });
+        df.addOnAction("StopMusic", (params) -> { audio.stop(); return null; });
 
         //TODO aggiungere una azione che faccia in modo di richiedere dei dati in particolare
         //TODO aggiungere una azione su DialogFlow che riconosca di impostare una playlist (Rilassante, Antica...)

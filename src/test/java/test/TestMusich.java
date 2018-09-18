@@ -1,7 +1,8 @@
 package test;
 
 import org.junit.Test;
-import support.Musich;
+import support.audio.AudioFile;
+import support.audio.Musich;
 
 public class TestMusich {
 
@@ -15,6 +16,22 @@ public class TestMusich {
         musich.stop();
         waitAndPrint(10);
         musich.stop();
+    }
+
+    @Test
+    public void test2() {
+        AudioFile audio = new AudioFile();
+        audio.play("Godzilla.wav"); // apparently it doesn't like some wav
+        waitAndPrint(3);
+        audio.play("Tullio.wav");
+        waitAndPrint(10);
+        audio.stop();
+        waitAndPrint(2);
+        audio.play("LeeroyJenkins.wav");
+        waitAndPrint(5);
+        audio.playRandom("random");
+        waitAndPrint(10);
+        audio.stop();
     }
 
     public void waitAndPrint(Integer seconds) {

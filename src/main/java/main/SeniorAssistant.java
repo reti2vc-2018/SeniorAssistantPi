@@ -47,14 +47,14 @@ public class SeniorAssistant {
         // list of arguments to use in the classes
         String hueAddress = arguments.get("hueaddress");
         String hueUser = arguments.get("hueuser");
-        //TODO String sensorAddress = arguments.get("sensorAddress");
+        //TODO GIOVEDI String sensorAddress = arguments.get("sensorAddress");
         Integer sensorNode = getInt(arguments.get("sensornode"));
         String remoteDbUser = arguments.get("remotedbuser");
         boolean autoBrightness = arguments.containsKey("autobrightness");
 
         try {
             LOG.info("Connessione alle Philips Hue...");
-            Hue lights = new Hue(hueAddress, hueUser);
+            Hue lights = (hueAddress!=null && hueUser!=null? new Hue(hueAddress, hueUser):new Hue());
 
             if(autoBrightness) try {
                 LOG.info("Connessione ai sensori...");
@@ -100,16 +100,8 @@ public class SeniorAssistant {
 
     /A/ Dati del sonno/battito/passi che l'utente puo' richiedere
     XXX Gestione luci secondo le esigenze dell'utente ( settare Dialogflow e server + risolvere bug )
-    XXX Gestione musica tramite comando vocale
-    TODO la musica non funzia su linux, ma forse
-        provando ad installare tramite comando:  sudo apt-get install ia32-libs-gtk
-        oppure con: sudo apt-get install libgtk-3-dev
-        oppure con: sudo apt-get install libgnomeui-dev libxtst-dev freeglut3-dev libgtk-3-dev libgtk2.0-dev
+    XXX Gestione musica tramite comando vocale //TODO mettere a posto dialogflow e inserire qualche canzone
 
-        guardare qui: http://www.eclipse.org/swt/faq.php#gtkstartup
-
-
-    // Randomly at night heavy metal start
     */
 
     /* ------------------------------------------------------------------------------------
@@ -117,20 +109,21 @@ public class SeniorAssistant {
        ------------------------------------------------------------------------------------ */
 
     /**
-     * Prende gli argomenti nel formato "-(.+)::(.+)" e li inserisce in una mappa.
+     * Prende gli argomenti nel formato "^-(?&lt;name&gt;[a-zA-Z]+)(::)?(?&lt;argument&gt;.*)$" e li inserisce in una mappa.
      * Se l'argomento non e' nel formato giusto lo ignora.
      * @param args un'array di stringhe contente i vari argomenti
      * @return una mappa con key il nome dell'argomento (la parte prima del :: e dopo il meno) e come valore il valore di esso (la parte dopo ::)
      */
     private static Map<String, String> getArgsMap(String[] args) {
         Map<String, String> map = new HashMap<>();
-        Pattern pattern = Pattern.compile("-(.+)::(.+)");
+        Pattern pattern = Pattern.compile("^-(?<name>[a-zA-Z]+)(::)?(?<argument>.*)$");
 
         for (String arg: args) {
             Matcher matcher = pattern.matcher(arg);
             if (matcher.find())
-                map.put(matcher.group(1).toLowerCase(), matcher.group(2));
+                map.put(matcher.group("name").toLowerCase(), matcher.group("argument"));
         }
+        LOG.info(map.toString());
         return map;
     }
 
