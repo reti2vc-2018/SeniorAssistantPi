@@ -3,6 +3,7 @@ package support.database;
 import ai.api.GsonFactory;
 import com.google.gson.Gson;
 import device.fitbitdata.HeartRate;
+import device.fitbitdata.Steps;
 import support.Rest;
 
 import java.sql.Timestamp;
@@ -73,13 +74,7 @@ public class RemoteDB implements Database {
     @Override
     public List<HeartRate> getHeartDataOfLast(int days) {
         try {
-            Calendar ago = Calendar.getInstance();
-            ago.setTimeInMillis(System.currentTimeMillis());
-            ago.add(Calendar.DATE, -days);
-
-            DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-
-            String url = base_url+"heartbeat/"+username+"/"+format.format(ago.getTime())+"/today/";
+            String url = base_url+"heartbeat/"+username+"/last/"+(days*24);
             Map<String, List<Map<String, Object>>> map = (Map<String, List<Map<String, Object>>>) Rest.get(url);
 
             List<HeartRate> list = new ArrayList<>(map.get("list").size());
@@ -89,6 +84,27 @@ public class RemoteDB implements Database {
                 heart.setDate(STD_FORMAT.parse((String)data.get("time")).getTime());
 
                 list.add(heart);
+            }
+            return list;
+        } catch (ParseException e) {
+            LOG.error(e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public List<Steps> getStepDataOfLast(int days) {
+        try {
+            String url = base_url+"step/"+username+"/last/"+(days*24);
+            Map<String, List<Map<String, Object>>> map = (Map<String, List<Map<String, Object>>>) Rest.get(url);
+
+            List<Steps> list = new ArrayList<>(map.get("list").size());
+            for(Map<String, Object> data: map.get("list")) {
+                Steps steps = new Steps();
+                steps.setSteps((int)data.get("value"));
+                steps.setDate(STD_FORMAT.parse((String)data.get("time")).getTime());
+
+                list.add(steps);
             }
             return list;
         } catch (ParseException e) {

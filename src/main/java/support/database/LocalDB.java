@@ -1,6 +1,7 @@
 package support.database;
 
 import device.fitbitdata.HeartRate;
+import device.fitbitdata.Steps;
 
 import java.sql.*;
 import java.util.LinkedList;
@@ -104,6 +105,29 @@ public class LocalDB implements Database {
                 rate.setDate(result.getDate("day").getTime());
 
                 list.add(rate);
+            }
+            return list;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public List<Steps> getStepDataOfLast(int days) {
+        try {
+            int dayToSubtract = 15;
+            long time = System.currentTimeMillis() - (dayToSubtract * 24 * 60 * 1000);
+
+            ResultSet result = conn.createStatement().executeQuery("SELECT * FROM steps WHERE day>='" + new Timestamp(time) + "'");
+            List<Steps> list = new LinkedList<>();
+
+            while(result.next()) {
+                Steps steps = new Steps();
+                steps.setSteps(result.getInt("rate"));
+                steps.setDate(result.getDate("day").getTime());
+
+                list.add(steps);
             }
             return list;
         } catch (SQLException e) {

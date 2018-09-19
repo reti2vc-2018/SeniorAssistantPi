@@ -102,10 +102,16 @@ public class DialogFlowWebHook {
             } catch (NullPointerException e) {
                 LOG.error("NESSUNA AZIONE TROVATA: "+ inputAction);
                 text = ERROR;
+            } catch (Exception e) {
+                LOG.error("Qualcosa e' andato storto: " + e.getMessage());
+                text = ERROR;
             }
 
             if(text == null)
                 text = input.getResult().getFulfillment().getSpeech();
+
+            for(String param: inputParam.keySet())
+                text = text.replace("@"+param, inputParam.get(param).getAsString());
 
             LOG.info("RISPOSTA: " + text);
             output.setDisplayText(text);
@@ -135,7 +141,8 @@ public class DialogFlowWebHook {
          *
          * @param params una mappa contenente tutti i parametri impostati da dialogflow
          * @return Una stringa che verra' usata come messaggio o null se non si vuole
+         * @throws Exception una qualunque eccezione che si vuole lanciare
          */
-	    String doAction(Map<String, JsonElement> params);
+	    String doAction(Map<String, JsonElement> params) throws Exception;
     }
 }

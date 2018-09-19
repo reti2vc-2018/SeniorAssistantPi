@@ -26,7 +26,7 @@ public class AuthFitbit {
     /**
      * Un logger per rendere le cose semplici in caso di casini
      */
-    private static final Logger LOG = LoggerFactory.getLogger("Fitbit Response");
+    private static final Logger LOG = LoggerFactory.getLogger("Fitbit Auth");
 
     /**
      * Un mapper per trasformare i json in mappe.
@@ -132,7 +132,7 @@ public class AuthFitbit {
 
         String content = response.parseAsString();
         response.disconnect();
-        LOG.info("Recived: " + content);
+        LOG.debug("Recived: " + content);
 
         return content;
     }
@@ -150,7 +150,7 @@ public class AuthFitbit {
      */
     public <O> O run(String url, Class<O> returnClass) throws IOException {
         O ret = MAPPER.readValue(this.run(url), returnClass);
-        LOG.info("Saved in class: " + JSON_FACTORY.toString(ret));
+        LOG.debug("Saved in class: " + JSON_FACTORY.toString(ret));
 
         return ret;
         /**/

@@ -5,6 +5,7 @@ import device.Fitbit;
 import device.Hue;
 import device.Sensor;
 import device.fitbitdata.HeartRate;
+import device.fitbitdata.Steps;
 import support.audio.Audio;
 import support.audio.AudioFile;
 import support.audio.Musich;
@@ -15,6 +16,9 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Classe che contiene tutti i thread che servono al programma per funzionare
+ */
 public class VariousThreads {
 
     /**
@@ -41,16 +45,15 @@ public class VariousThreads {
      * Costruttore
      */
     public VariousThreads() {
-        // audio = new AudioFile();
+        // audio = new AudioFile(); se si vuole solamente questo e non YT
         audio = System.getProperty("os.name").startsWith("Windows")? new Musich():new AudioFile();
     }
 
-    // TODO aggingere il fitbit per la richiesta dei dati
     /**
      * Fa partire il server Webhook per DialogFlow e continua l'esecuzione
      * @param lights le luci che deve controllare
      */
-    public void startWebhook(final Hue lights) {
+    public void startWebhook(final Hue lights, final Fitbit fitbit) {
         DialogFlowWebHook df = new DialogFlowWebHook();
 
         df.addOnAction("LightsON", (params) -> { lights.turnOn(); cooldown.set(COOLDOWN_IN_MINUTES); return null; });
@@ -87,8 +90,23 @@ public class VariousThreads {
         });
         df.addOnAction("StopMusic", (params) -> { audio.stop(); return null; });
 
-        //TODO aggiungere una azione che faccia in modo di richiedere dei dati in particolare
-        //TODO aggiungere una azione su DialogFlow che riconosca di impostare una playlist (Rilassante, Antica...)
+        // TODO GIOVEDI aggiungere un orario magari? se no va bene cosi
+        df.addOnAction("ReqHearthbeat", (params) -> {
+            double rate = fitbit.getHeartRate(60);
+            return "Il battito medio dell'ultima ora e' di "+rate;
+        });
+        df.addOnAction("ReqSteps", (params) -> {
+            int steps = fitbit.getSteps();
+            return "I passi fatti oggi sono "+steps;
+        });
+        df.addOnAction("ReqDistance", (params) -> {
+            double steps = fitbit.getSteps();
+            return String.format("Oggi hai percorso circa %.2f kilometri", steps/2000);
+        });
+        df.addOnAction("ReqSleep", (params) -> {
+            long sleep = fitbit.getHoursSleep();
+            return String.format("Oggi hai dormito per %.2f ore", (double)sleep/3600000);
+        });
 
         df.startServer();
         SeniorAssistant.LOG.info("Webhook partito");
@@ -134,7 +152,7 @@ public class VariousThreads {
                     calculateBrightFactor(
                         calendar.get(Calendar.HOUR_OF_DAY),
                         calendar.get(Calendar.MINUTE),
-                        sensor.getBrightnessLevel()/10,
+                        sensor.getBrightnessLevel(),
                         minBrightness
                     );
 
@@ -156,6 +174,7 @@ public class VariousThreads {
     public void startHueControlledByHeartBeat(final Hue lights, final Fitbit fitbit, final Database database) {
         final int minutes = 30;
         final int delta = 15;
+        final Audio audio = new AudioFile();
         Thread thread = getThreadStartingEach(new Runnable() {
             @Override
             public synchronized void run() {
@@ -177,15 +196,16 @@ public class VariousThreads {
                 }
                 average = count!=0? sum/count:0;
 
-                //TODO impostare azioni anche di {E}
+                //TODO avvisare con una voce registrata? far partire musica rilassante?
                 double rateNow = fitbit.getHeartRate(minutes);
-                if ((rateNow-average) >= delta )
+                if (Math.abs(rateNow-average) > delta ) {
                     lights.decreaseBrightness();
-                    //avvisare con una voce registrata?
-                else if ((rateNow-average) <= -delta)
-                    //alzare le luci?
-                    //avvisare con una voce registrata?
-                    ;
+                    audio.play("Tullio.wav");
+                }
+                else if (Math.abs(rateNow-average) < delta) {
+                    lights.increaseBrightness();
+                    audio.play("Tullio.wav");
+                }
             }
         }, minutes, "lights-with-heartbeat");
 
@@ -193,17 +213,49 @@ public class VariousThreads {
         SeniorAssistant.LOG.info("Thread per il controllo delle luci tramite il battito cardiaco partito");
     }
 
-    // TODO Ad una certa ora guarda i passi e se sono pochi dillo
     /**
      * Controlla che ad una certa ora si siano fatti abbastanza passi, ed in caso contrario avvisa tramite un messaggio vocale.<br>
      * E' possibile trasformarlo in controlla ogni X se si sono fatti dei movimenti o meno.
-     * @param fitbit da dove vediamo se si sono fatti abbastanza passi
+     * @param database da dove vediamo se si sono fatti abbastanza passi
      */
-    public void startCheckSteps(final Fitbit fitbit) {
-        // trovare un orario (magari inserirlo tramite arg)
-        // a quell'ora controllare i passi fatti durante la giornata
-        // se pochi mandare un avviso tramite dialogFlow(?)
-        // (secondo me si puo' evitare)
+    public void startCheckSteps(final Database database) {
+        final int minute = 24 * 60; // ogni ventiquattro ore circa
+        final int norm = 4500;
+        final int delta = 1500; // average steps for 60 year old -> 3.500-5.500 or so they say
+        final Audio audio = new AudioFile();
+
+        // ma la domanda e': ad una certa ora o ad ogni X ore?
+        // AD UNA DETERMINATA ORA
+        Thread thread = getThreadStartingAt(new Runnable() {
+            @Override
+            public synchronized void run() {
+                List<Steps> list = database.getStepDataOfLast(1);
+
+                double sum=0;
+                int size = list.size();
+                for(Steps steps: list)
+                    sum += steps.getSteps();
+                final long average = size!=0? (long)(sum/size):0;
+
+                /* Con normale dettata dal tizio e average e' il primo risultato della lista
+                List<Steps> list = database.getStepDataOfLast(15);
+
+                //for
+
+                final long norm = size!=0? (long)(sum/size):0;
+                final long average = size!=0? list.get(0).getSteps():0;
+                 */
+
+                //TODO avvisare con una voce registrata?
+                if (Math.abs(norm-average) > delta )
+                    audio.play("Tullio.wav");
+                else if (Math.abs(norm-average) < delta)
+                    audio.play("Tullio.wav");
+
+            }
+        }, 20, "checking-steps");
+
+        thread.start();
     }
 
 
@@ -236,6 +288,42 @@ public class VariousThreads {
     }
 
     /**
+     * Restuisce un thread che se fatto partire, esegue il runnable in un sub-thread alll'ora indicata ogni giorno<br>
+     * Il sotto thread lanciato avra' lo stesso nome, ma con un trattino e la data di lancio a seguito<br>
+     * Se il thread viene interrotto non fa piu' partire il runnable e si ferma
+     * @param runnable il runnable da lanciare
+     * @param hour l'ora a cui far partire il thread, se negativa o maggiore di 23 ritorna null
+     * @param threadName il nome da dare al thread
+     */
+    public static Thread getThreadStartingAt(final Runnable runnable, final int hour, String threadName) {
+        if(hour<0 || hour>23)
+            return null;
+
+        return new Thread(new Runnable() {
+            @Override
+            public synchronized void run() {
+                boolean notInterrupted = true;
+                Calendar calendar = Calendar.getInstance();
+                do {
+                    try {
+                        double hourCalculated = calendar.get(Calendar.HOUR_OF_DAY)+((double)calendar.get(Calendar.MINUTE)/60);
+                        double hourToWait = hour-hourCalculated;
+                        if(hourToWait<0)
+                            hourToWait += 24;
+
+                        wait((long)(hourToWait * 60 * MILLISEC_IN_MINUTE));
+                        Thread thread = new Thread(runnable, threadName + "-" + new Timestamp(System.currentTimeMillis()));
+                        thread.start();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        notInterrupted = false;
+                    }
+                } while (notInterrupted);
+            }
+        });
+    }
+
+    /**
      * Restuisce un thread che se fatto partire, esegue il runnable in un sub-thread ogni X minuti<br>
      * Il sotto thread lanciato avra' lo stesso nome, ma con un trattino e la data di lancio a seguito<br>
      * Se il thread viene interrotto non fa piu' partire il runnable e si ferma
@@ -243,7 +331,7 @@ public class VariousThreads {
      * @param minutes i minuti da aspettare, se negativi o 0 ritorna null
      * @param threadName il nome da dare al thread
      */
-    public static Thread getThreadStartingEach(final Runnable runnable, int minutes, String threadName) {
+    public static Thread getThreadStartingEach(final Runnable runnable, final int minutes, String threadName) {
         if(minutes<1)
             return null;
 

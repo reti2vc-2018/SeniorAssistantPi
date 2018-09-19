@@ -3,13 +3,13 @@ package support.database;
 import device.Fitbit;
 import device.fitbitdata.HeartRate;
 import device.fitbitdata.Sleep;
+import device.fitbitdata.Steps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static main.VariousThreads.MILLISEC_IN_MINUTE;
-import static main.VariousThreads.getThreadStartingEach;
+import static main.VariousThreads.*;
 
 public interface Database {
 
@@ -54,6 +54,13 @@ public interface Database {
     List<HeartRate> getHeartDataOfLast(int days);
 
     /**
+     * Riceve i dati dei passi dal giorno selezionato fino ad oggi
+     * @param days quanti giorni devono esser considerati
+     * @return una lista dei passifatti negli ultimi X giorni (ordinati da oggi al giorno X)
+     */
+    List<Steps> getStepDataOfLast(int days);
+
+    /**
      * Prendi il Thread che automaticamente gestisce l'inserimento dei dati orari (per ora solo il battito cardiaco)<br>
      * Se per caso c'e' un fallimento riprova ad inserire i dati ogni x minuti, indicati dal terzo parametro<br>
      * @param database il database in cui inserirlo
@@ -65,19 +72,20 @@ public interface Database {
         Runnable runnable = new Runnable() {
             @Override
             public synchronized void run() {
-                LOG.info("Aggiornamento orario iniziato");
                 try {
                     boolean retry;
                     long now = System.currentTimeMillis();
-                    double heartRate = 30;//fitbit.getHeartRate(60);
+                    double heartRate = fitbit.getHeartRate(60);
+                    int steps = fitbit.getSteps(1);
                     do {
                         retry = !database.updateHeart(now, heartRate);
-                        LOG.info("Aggiornamento " + (!retry ? "riuscito" : "fallito, riprovo fra " + retryMinutes + " minuti"));
+                        retry = retry && !database.updateSteps(now, steps);
+                        LOG.info("Aggiornamento orario " + (!retry ? "riuscito" : "fallito, riprovo fra " + retryMinutes + " minuti"));
                         if (retry)
                             wait(retryMinutes * MILLISEC_IN_MINUTE);
                     } while(retry);
                 } catch (Exception e) {
-                    LOG.warn("Aggiornamento interrotto");
+                    LOG.warn("Aggiornamento orario interrotto");
                 }
             }
         };
@@ -86,7 +94,7 @@ public interface Database {
     }
 
     /**
-     * Prendi il Thread che automaticamente gestisce l'inserimento dei dati giornalieri<br>
+     * Prendi il Thread che automaticamente gestisce l'inserimento dei dati giornalieri, esso fara' i tentativi alle 23<br>
      * Se per caso c'e' un fallimento riprova ad inserire i dati ogni x minuti, indicati dal terzo parametro<br>
      * @param database il database in cui inserirlo
      * @param fitbit la classe che contiene i dati aggiornati
@@ -97,27 +105,23 @@ public interface Database {
         Runnable runnable = new Runnable() {
             @Override
             public synchronized void run() {
-                LOG.info("Aggiornamento giornaliero iniziato");
                 try {
-                    boolean retry;
-                    long steps = fitbit.getSteps();
                     List<Sleep.SleepData> sleepDatas = fitbit.getDetailedSleep();
-                    long now = System.currentTimeMillis();
+                    boolean retry = !sleepDatas.isEmpty();
                     do {
-                        retry = !database.updateSteps(now, steps);
                         for (Sleep.SleepData data : sleepDatas)
                             retry = retry && !database.updateSleep(data.start_date, data.duration);
 
-                        LOG.info("Aggiornamento " + (!retry ? "riuscito" : "fallito, riprovo fra " + retryMinutes + " minuti"));
+                        LOG.info("Aggiornamento giornaliero" + (!retry ? "riuscito" : "fallito, riprovo fra " + retryMinutes + " minuti"));
                         if (retry)
                             wait(retryMinutes * MILLISEC_IN_MINUTE);
                     } while (retry);
                 } catch (Exception e) {
-                    LOG.warn("Aggiornamento interrotto");
+                    LOG.warn("Aggiornamento giornaliero interrotto");
                 }
             }
         };
 
-        return getThreadStartingEach(runnable, 24*60, "update-daily-data");
+        return getThreadStartingAt(runnable, 23, "update-daily-data");
     }
 }

@@ -41,6 +41,7 @@ public class SeniorAssistant {
      * @param args i possibili argomenti da passare al programma
      */
     public static void main(String[] args) {
+        //TODO magari aggiungere un arg con la path per la musica in modo che si possa ampliare in futuro
         VariousThreads threads = new VariousThreads(); // this should be the first action of the main
         Map<String, String> arguments = getArgsMap(args);
 
@@ -65,22 +66,24 @@ public class SeniorAssistant {
                 LOG.warn(e.getMessage());
             }
 
+            // Lo dichiaro qui, cosi' anche se non ci si puo' collegare al fitbit si puo comunque comandare le luci
+            Fitbit fitbit=null;
             try {
                 LOG.info("Connessione al Fitbit, ignorare eventuale errore per setPermissionsToOwnerOnly...");
-                Fitbit fitbit = new Fitbit();
+                fitbit = new Fitbit();
 
                 LOG.info("Connessione al database...");
                 Database database = remoteDbUser == null ? new LocalDB() : new RemoteDB(remoteDbUser);
 
                 threads.startInsertData(database, fitbit);
                 threads.startHueControlledByHeartBeat(lights, fitbit, database);
-                threads.startCheckSteps(fitbit);
+                threads.startCheckSteps(database);
             } catch (Exception e) {
                 LOG.warn("Non e' stato possibile collegarsi al fitbit");
                 e.printStackTrace();
             }
 
-            threads.startWebhook(lights);
+            threads.startWebhook(lights, fitbit);
         } catch (Exception e) {
             LOG.error(e.getMessage());
         }
@@ -88,19 +91,19 @@ public class SeniorAssistant {
     }
 
     /*
-    TODO AUTOMATIC: {D}
+    AUTOMATIC:
 
     XXX Gestione DB in modo che si aggiorni ogni ora
     XXX Gestione luci in modo che la luminosità sia sempre la stessa
     XXX Gestione luci a seconda del battito cardiaco
-    /D/ Ogni X ore/minuti guarda i passi e se sono pochi dillo
+    XXX Ogni X ore/minuti guarda i passi e se sono pochi dillo
     XXX Se i battiti sono troppo bassi/alti avvisare il tizio
 
-    TODO USER-INTERACTION {A}
+    USER-INTERACTION:
 
-    /A/ Dati del sonno/battito/passi che l'utente puo' richiedere
+    XXX Dati del sonno/battito/passi che l'utente puo' richiedere
     XXX Gestione luci secondo le esigenze dell'utente ( settare Dialogflow e server + risolvere bug )
-    XXX Gestione musica tramite comando vocale //TODO mettere a posto dialogflow e inserire qualche canzone
+    XXX Gestione musica tramite comando vocale //TODO inserire qualche canzone
 
     */
 

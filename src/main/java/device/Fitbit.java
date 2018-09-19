@@ -1,17 +1,17 @@
 package device;
 
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import device.fitbitdata.HeartRate;
 import device.fitbitdata.Sleep;
 import device.fitbitdata.Steps;
 import oauth.AuthFitbit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Classe che permette di ricevere i dati di un particolare account FitBit
@@ -83,11 +83,32 @@ public class Fitbit {
 	 * Ricevi i passi che l'utente ha effettuato nell'ultimo giorno
 	 * 
 	 * @return un intero rappresentante i passi effettuati
-	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
 	public synchronized int getSteps() {
-		steps = update(Steps.class, steps, "1" + USER + "activities/steps/date/today/1w.json");
+		steps = update(Steps.class, steps, "1" + USER + "activities/steps/date/today/1d/1min.json");
 		return steps.getSteps();
+	}
+
+	/**
+	 * Ricevi i passi che l'utente ha effettuato negli ultimi minuti richiesti
+	 *
+	 * @param lastMinutes gli ultimi minuti che si vogliono vedere (positivi e !=0 se no ritorno -1)
+	 * @return un intero rappresentante i passi effettuati
+	 */
+	public synchronized int getSteps(int lastMinutes) {
+		if(lastMinutes<=0)
+			return -1;
+
+		steps = update(Steps.class, steps, "1" + USER + "activities/steps/date/today/1d/1min.json");
+
+		List<Map<String, Object>> list = steps.getStepsData();
+		final int now = list.size()-1;
+
+		int totalSteps = 0;
+		for(int i=0; i<lastMinutes; i++)
+			totalSteps += (int)list.get(now-i).get("value");
+
+		return totalSteps;
 	}
 
 	/**
@@ -95,7 +116,6 @@ public class Fitbit {
 	 * Il risultato e' una media del battito che l'utente ha avuto negli ultimi 15 minuti
 	 * 
 	 * @return un intero rappresentante la media del battito cardiaco degli ultimi 15 minuti
-	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
 	public synchronized double getHeartRate() { return getHeartRate(15); }
 
@@ -105,7 +125,6 @@ public class Fitbit {
 	 * 
 	 * @param lastMinutes fino a quanti minuti bisogna tenere conto (positivi e !=0 se no ritorno -1)
 	 * @return un intero rappresentante la media del battito cardiaco degli ultimi minuti specificati
-	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
 	public synchronized double getHeartRate(int lastMinutes) {
 		if(lastMinutes<=0)
@@ -127,7 +146,6 @@ public class Fitbit {
 	 * Ricevi le ore di sonno che l'utente ha fatto nell'ultimo giorno
 	 * 
 	 * @return un intero rappresentante le ore passate a dormire
-	 * @throws IOException nel caso la richiesta non vada a buon fine
 	 */
 	public synchronized long getHoursSleep() {
 		sleep = update(Sleep.class, sleep,"1.2" + USER + "sleep/date/today.json");
@@ -141,7 +159,6 @@ public class Fitbit {
 	 * - la durata del sonno<br>
 	 * - la data di fine<br>
 	 * @return una lista contenente ogni volta che l'utente ha dormito
-	 * @throws IOException
 	 */
 	public synchronized List<Sleep.SleepData> getDetailedSleep() {
 		sleep = update(Sleep.class, sleep,"1.2" + USER + "sleep/date/today.json");
@@ -169,16 +186,17 @@ public class Fitbit {
 				return variable;
 		} catch (NullPointerException e) {
 			// do nothing and update
-		} finally {
-			LOG.info("Updating " + varClass.getSimpleName() + " form " + BASIC_URL + url);
-			try {
-				variable = auth.run(BASIC_URL + url, varClass);
-				latestRequest.put(varClass, System.currentTimeMillis());
-			} catch (IOException e) {
-				LOG.error("Non sono riuscito a prender i dati aggiornati: " + e.getMessage());
-			}
-			return variable;
 		}
+
+		LOG.info("Updating " + varClass.getSimpleName() + " form " + BASIC_URL + url);
+		try {
+			variable = auth.run(BASIC_URL + url, varClass);
+			latestRequest.put(varClass, System.currentTimeMillis());
+		} catch (IOException e) {
+			LOG.error("Non sono riuscito a prender i dati aggiornati: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return variable;
 	}
 
 	/**

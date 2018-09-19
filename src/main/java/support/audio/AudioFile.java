@@ -24,7 +24,7 @@ public class AudioFile implements Audio {
     /**
      * L'ultimo audio fatto partire
      */
-    private AudioStream lastIn = null;
+    private static AudioStream lastIn = null;
 
     /**
      * Serve per crearsi una mapp di tutte le canzoni

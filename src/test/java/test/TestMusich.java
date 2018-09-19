@@ -34,6 +34,18 @@ public class TestMusich {
         audio.stop();
     }
 
+    @Test
+    public void test3() {
+        AudioFile audio = new AudioFile();
+        AudioFile audio2 = new AudioFile();
+        audio.play("Tullio.wav");
+        waitAndPrint(3);
+        audio2.play("Tullio.wav");
+        waitAndPrint(10);
+        audio.stop();
+        audio2.stop();
+    }
+
     public void waitAndPrint(Integer seconds) {
         if(seconds != null) synchronized (seconds) {
             try {

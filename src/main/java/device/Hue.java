@@ -80,6 +80,7 @@ public class Hue {
         if(allLights.isEmpty())
             throw new NullPointerException("Non e' stato possibile connettersi alle luci");
 
+        // TODO GIOVEDI impostare una luminosita' e un colore di default
         double bri = 0;
         double hue = 0;
         for (String name: allLights.keySet()) {
@@ -147,7 +148,7 @@ public class Hue {
     	else if (num>100)
     	    num=100;
 
-    	setState("bri", (int) (num*MAX_BRIGHTNESS)/100 );
+    	setState("bri", (int) (num*MAX_BRIGHTNESS)/100, true);
         brightness.set(num);
     }
 
@@ -196,23 +197,13 @@ public class Hue {
     public void changeColor(String colorName) {
         for (String regex: COLORS.keySet())
             if(colorName.matches("(?i)" + regex))
-                setState("xy", COLORS.get(regex));
+                setState("xy", COLORS.get(regex), true);
     }
 
     /**
      * Modifica il colore delle luci in modo da fare un bel effetto arcobaleno continuo
      */
-    public void colorLoop() { setState("effect", "colorloop"); }
-
-    /**
-     * Invia una richiesta a tutte le luci hue con l'attributo selezionato ed il suo valore<br>
-     * Con esso invia anche una transition:20 in modo che sia piu fluido il cambiamento
-     * @param attribute l'attributo che si vuole cambiare
-     * @param value il valore da inserire
-     */
-    public void setState(String attribute, Object value){
-        setState(attribute, value, true);
-    }
+    public void colorLoop() { setState("effect", "colorloop", false); }
 
     /**
      * Invia una richiesta a tutte le luci hue con l'attributo selezionato ed il suo valore<br>
@@ -221,7 +212,7 @@ public class Hue {
      * @param value il valore da inserire
      * @param transition se includere la transizione o meno
      */
-    public void setState(String attribute, Object value, boolean transition){
+    private void setState(String attribute, Object value, boolean transition){
         Map<String, Object> map = new HashMap<>();
         map.put(attribute, value);
         if(transition)
@@ -233,7 +224,7 @@ public class Hue {
      * Invia una richiesta a tutte le luci hue con gli attributi selezionati ed il loro valore
      * @param attributes una mappa di attributi -> valori
      */
-    public synchronized void setState(Map<String, Object> attributes) {
+    private synchronized void setState(Map<String, Object> attributes) {
         String body = GsonFactory.getDefaultFactory().getGson().toJson(attributes);
         LOG.info("Setting: " + body);
         for (String light : allLights.keySet()) {

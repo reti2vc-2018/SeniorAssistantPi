@@ -1,6 +1,5 @@
 package test;
 
-import ai.api.GsonFactory;
 import device.Hue;
 import main.VariousThreads;
 import org.junit.Before;
@@ -51,12 +50,10 @@ public class TestLights {
 
     @Test
     synchronized public void testColor() throws InterruptedException {
-        // change colors
-        for (int i=0; i<=360; i++) {
-            double radian = (0.0174533*i);
-            double x = Math.cos(radian);
-            double y = Math.sin(radian);
-            lights.setState("xy", GsonFactory.getDefaultFactory().getGson().toJson(new Double[]{x, y}));
+        String[] colors = {"rosso", "giallo", "verde", "blu", "bianco", "azzurro", "arancio"};
+
+        for (String color : colors) {
+            lights.changeColor(color);
             this.wait(TIMEOUT);
         }
     }
