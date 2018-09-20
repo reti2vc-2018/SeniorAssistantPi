@@ -6,7 +6,6 @@ import de.fh_zwickau.informatik.sensor.model.devices.Device;
 import de.fh_zwickau.informatik.sensor.model.devices.DeviceList;
 import support.ZWaySimpleCallback;
 
-// TODO GIOVEDI da mettere a posto secondo me, dato che da un po di problemi IRL
 /**
  * Sensore che permette di registrare vari dati dell'ambiente
  */
@@ -99,13 +98,4 @@ public class Sensor {
                 device.update();
             } catch (Exception e) { }
     }
-    /*
-    public boolean IsLowLuminescence(int Luminescence) {
-                if (dev.getProbeType().equalsIgnoreCase("Luminescence"))
-                    if (Integer.parseInt(dev.getMetrics().getLevel()) < Luminescence)
-                        return true;
-                    else
-                        return false;
-                    return false;
-    }*/
 }

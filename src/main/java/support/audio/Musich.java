@@ -2,6 +2,7 @@ package support.audio;
 
 import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 import chrriis.dj.nativeswing.swtimpl.components.JWebBrowser;
+import org.apache.http.annotation.Obsolete;
 import support.Rest;
 
 import javax.swing.*;
@@ -16,6 +17,7 @@ import java.util.Map;
 /**
  * Classe che serve a far partire un video di youtube in una frame
  */
+@Deprecated
 public class Musich implements Audio {
 
     /**

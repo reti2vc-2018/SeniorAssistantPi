@@ -15,7 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by 20015159 on 28/08/2018.
  * Ci si puo' interfacciare con l'assistente tramite Telegram o dal sito di ngrok.
  */
 public class SeniorAssistant {
@@ -33,7 +32,6 @@ public class SeniorAssistant {
      * <ul>
      *     <li>hueAddress</li>
      *     <li>hueUser</li>
-     *     <li>sensorAddress</li>
      *     <li>autoBrightness</li>
      *     <li>sensorNode</li>
      *     <li>remoteDbUser</li>
@@ -41,14 +39,12 @@ public class SeniorAssistant {
      * @param args i possibili argomenti da passare al programma
      */
     public static void main(String[] args) {
-        //TODO magari aggiungere un arg con la path per la musica in modo che si possa ampliare in futuro
         VariousThreads threads = new VariousThreads(); // this should be the first action of the main
         Map<String, String> arguments = getArgsMap(args);
 
         // list of arguments to use in the classes
         String hueAddress = arguments.get("hueaddress");
         String hueUser = arguments.get("hueuser");
-        //TODO GIOVEDI String sensorAddress = arguments.get("sensorAddress");
         Integer sensorNode = getInt(arguments.get("sensornode"));
         String remoteDbUser = arguments.get("remotedbuser");
         boolean autoBrightness = arguments.containsKey("autobrightness");
@@ -89,23 +85,6 @@ public class SeniorAssistant {
         }
         LOG.info("FINE MAIN");
     }
-
-    /*
-    AUTOMATIC:
-
-    XXX Gestione DB in modo che si aggiorni ogni ora
-    XXX Gestione luci in modo che la luminosità sia sempre la stessa
-    XXX Gestione luci a seconda del battito cardiaco
-    XXX Ogni X ore/minuti guarda i passi e se sono pochi dillo
-    XXX Se i battiti sono troppo bassi/alti avvisare il tizio
-
-    USER-INTERACTION:
-
-    XXX Dati del sonno/battito/passi che l'utente puo' richiedere
-    XXX Gestione luci secondo le esigenze dell'utente ( settare Dialogflow e server + risolvere bug )
-    XXX Gestione musica tramite comando vocale //TODO inserire qualche canzone
-
-    */
 
     /* ------------------------------------------------------------------------------------
             Le funzioni qui sotto servono solamente per gli argomenti passati al main

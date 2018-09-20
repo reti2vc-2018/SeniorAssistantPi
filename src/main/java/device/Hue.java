@@ -68,7 +68,7 @@ public class Hue {
     /**
      * Cerca le luci Philips Hue nell'indirizzo specificato e con l'utente specificato.<br>
      * Una volta trovate le luci le setta tutte alla stessa luminosita' e allo stesso colore<br>
-     * (per ora fa una media e poi assegna il valore risultante a tutte)
+     * (luminosità massima e colore bianco)
      * @param ip l'indirizzo IP (seguito dalla porta se e' diversa dalla solita 8000)
      * @param user l'utente
      * @throws NullPointerException se non trova nessun bridge
@@ -80,23 +80,8 @@ public class Hue {
         if(allLights.isEmpty())
             throw new NullPointerException("Non e' stato possibile connettersi alle luci");
 
-        // TODO GIOVEDI impostare una luminosita' e un colore di default
-        double bri = 0;
-        double hue = 0;
-        for (String name: allLights.keySet()) {
-            Map<String, Object> state = (Map<String, Object>)allLights.get(name).get("state");
-            bri += (Double) state.get("bri");
-            hue += (Double) state.get("hue");
-        }
-        bri = bri/allLights.size();
-        hue = hue/allLights.size();
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("bri", (int)bri);
-        map.put("hue", (int)hue);
-        setState(map);
-
-        brightness.set((bri*MAX_BRIGHTNESS)/100);
+        setBrightness(100);
+        changeColor("bianco");
     }
 
     /**

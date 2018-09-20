@@ -10,28 +10,23 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Classe per i dati del sonno dell'utente
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Sleep {
 
-    private int minutesAsleep;
+    private long minutesAsleep;
 
     private List<SleepData> datas;
 
-    public int getMinutesAsleep() {
-        return minutesAsleep;
-    }
-
-    public List<SleepData> getDatas() {
-        return datas;
-    }
-
     @JsonProperty("summary")
-    public void setMinutesAsleep(Map<String, Object> map) {
-        minutesAsleep = (int) map.get("totalMinutesAsleep");
+    private void setMinutesAsleep(Map<String, Object> map) {
+        minutesAsleep = (long) map.get("totalMinutesAsleep");
     }
 
     @JsonProperty("sleep")
-    public void setSleepsList(Map<String, Object>[] array) {
+    private void setSleepsList(Map<String, Object>[] array) {
         datas = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat();
         for(Map<String, Object> map : array) {
@@ -47,8 +42,33 @@ public class Sleep {
         }
     }
 
+    /**
+     * I minuti totali che l'utente ha avuto di sonno durante il giorno
+     * @return i minuti totali
+     */
+    public long getMinutesAsleep() {
+        return minutesAsleep;
+    }
+
+    /**
+     * Ricevi i dati più specifici riguardo al sonno
+     * @return una lista con i dati specifici del sonno
+     */
+    public List<SleepData> getDatas() {
+        return datas;
+    }
+
+    /**
+     * Classe utilizzata per avere i dati più specifici del sonno
+     */
     public class SleepData {
+        /**
+         * La data d'inizio del sonno in millisec
+         */
         public final long start_date;
+        /**
+         * La durata del sonno in millisec
+         */
         public final long duration;
 
         SleepData(Date start_date, long duration) {

@@ -11,6 +11,9 @@ import java.util.List;
 
 import static main.VariousThreads.*;
 
+/**
+ * Interfaccia per collegarsi al database
+ */
 public interface Database {
 
     /**

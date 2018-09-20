@@ -9,6 +9,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Classe che serve a vedere i passi fatti secondo il fitbit
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Steps extends FitbitData {
 
@@ -31,7 +34,21 @@ public class Steps extends FitbitData {
 		stepsData = new ArrayList<>((List<Map<String, Object>>) map.get("dataset"));
 	}
 
+	/**
+	 * Assegna il valore dei passi
+	 * @param steps i passi
+	 */
 	public void setSteps(int steps) { this.steps = steps; }
+
+	/**
+	 * I passi totali fatti durante il giorno
+	 * @return i passi totali
+	 */
 	public int getSteps() { return steps; }
+
+	/**
+	 * Prendi i dati specifici dei passi
+	 * @return una lista contenente una mappa con delle ore e minuti ad un valore del
+	 */
 	public List<Map<String, Object>> getStepsData() { return stepsData; }
 }

@@ -24,17 +24,17 @@ public class AudioFile implements Audio {
     /**
      * L'ultimo audio fatto partire
      */
-    private static AudioStream lastIn = null;
+    private AudioStream lastIn = null;
 
     /**
      * Serve per crearsi una mapp di tutte le canzoni
      */
-    private Map<String, File> files = getAllFiles(PATH_AUDIO);
+    private final static Map<String, File> files = getAllFiles(PATH_AUDIO);
 
     /**
      * Mappa che serve ad avere per ogni sotto-dir di audio una lista di ogni file audio che c'e'
      */
-    private Map<String, List<File>> dirs = getAllDirs(PATH_AUDIO);
+    private final static Map<String, List<File>> dirs = getAllDirs(PATH_AUDIO);
 
     /**
      * Fa partire una canzone che si trova nella cartella audio o in una delle sue sottocartelle
@@ -79,7 +79,7 @@ public class AudioFile implements Audio {
      * @param path la path iniziale
      * @return una mappa di NomeFile -> File
      */
-    private Map<String, File> getAllFiles(String path) {
+    private static Map<String, File> getAllFiles(String path) {
         File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
         Map<String, File> map = new HashMap<>();
@@ -99,7 +99,7 @@ public class AudioFile implements Audio {
      * @param path la path iniziale
      * @return una mappa di directory con i loro file
      */
-    private Map<String, List<File>> getAllDirs(String path) {
+    private static Map<String, List<File>> getAllDirs(String path) {
         File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
         List<File> list = new LinkedList<>();

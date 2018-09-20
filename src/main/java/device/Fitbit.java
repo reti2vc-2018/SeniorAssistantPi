@@ -51,7 +51,7 @@ public class Fitbit {
 	private final Map<Class<?>, Long> latestRequest = new HashMap<>();
 
 	/**
-	 * Un calendario in modo da sapere la data per i dati
+	 * Un calendario in modo da sapere la data per prendere i dati
 	 */
 	private final Calendar calendar = Calendar.getInstance();
 
@@ -156,8 +156,7 @@ public class Fitbit {
 	 * Ricevi tutti i dati presenti per il sonno di questo giorno.
 	 * La lista contiene per ogni volta che l'utente ha dormito:<br>
 	 * - la data di quando si e' addormentato<br>
-	 * - la durata del sonno<br>
-	 * - la data di fine<br>
+	 * - la durata del sonno
 	 * @return una lista contenente ogni volta che l'utente ha dormito
 	 */
 	public synchronized List<Sleep.SleepData> getDetailedSleep() {

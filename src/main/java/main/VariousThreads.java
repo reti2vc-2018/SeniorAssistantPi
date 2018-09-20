@@ -45,8 +45,8 @@ public class VariousThreads {
      * Costruttore
      */
     public VariousThreads() {
-        // audio = new AudioFile(); se si vuole solamente questo e non YT
-        audio = System.getProperty("os.name").startsWith("Windows")? new Musich():new AudioFile();
+        audio = new AudioFile(); // se si vuole solamente questo e non YT
+        // audio = System.getProperty("os.name").startsWith("Windows")? new Musich():new AudioFile();
     }
 
     /**
@@ -89,8 +89,6 @@ public class VariousThreads {
             return null;
         });
         df.addOnAction("StopMusic", (params) -> { audio.stop(); return null; });
-
-        // TODO GIOVEDI aggiungere un orario magari? se no va bene cosi
         df.addOnAction("ReqHearthbeat", (params) -> {
             double rate = fitbit.getHeartRate(60);
             return "Il battito medio dell'ultima ora e' di "+rate;
@@ -196,15 +194,15 @@ public class VariousThreads {
                 }
                 average = count!=0? sum/count:0;
 
-                //TODO avvisare con una voce registrata? far partire musica rilassante?
                 double rateNow = fitbit.getHeartRate(minutes);
-                if (Math.abs(rateNow-average) > delta ) {
+                if (Math.abs(rateNow-average) > delta ) { // ALTO
                     lights.decreaseBrightness();
-                    audio.play("Tullio.wav");
+                    audio.playRandom("relax");
+                    new AudioFile().play("molti battiti.wav");
                 }
-                else if (Math.abs(rateNow-average) < delta) {
+                else if (Math.abs(rateNow-average) < delta) { // BASSO avvisa ma niente musica
                     lights.increaseBrightness();
-                    audio.play("Tullio.wav");
+                    audio.play("pochi battiti.wav");
                 }
             }
         }, minutes, "lights-with-heartbeat");
@@ -219,13 +217,10 @@ public class VariousThreads {
      * @param database da dove vediamo se si sono fatti abbastanza passi
      */
     public void startCheckSteps(final Database database) {
-        final int minute = 24 * 60; // ogni ventiquattro ore circa
         final int norm = 4500;
         final int delta = 1500; // average steps for 60 year old -> 3.500-5.500 or so they say
         final Audio audio = new AudioFile();
 
-        // ma la domanda e': ad una certa ora o ad ogni X ore?
-        // AD UNA DETERMINATA ORA
         Thread thread = getThreadStartingAt(new Runnable() {
             @Override
             public synchronized void run() {
@@ -237,20 +232,10 @@ public class VariousThreads {
                     sum += steps.getSteps();
                 final long average = size!=0? (long)(sum/size):0;
 
-                /* Con normale dettata dal tizio e average e' il primo risultato della lista
-                List<Steps> list = database.getStepDataOfLast(15);
-
-                //for
-
-                final long norm = size!=0? (long)(sum/size):0;
-                final long average = size!=0? list.get(0).getSteps():0;
-                 */
-
-                //TODO avvisare con una voce registrata?
                 if (Math.abs(norm-average) > delta )
-                    audio.play("Tullio.wav");
+                    audio.play("molti passi.wav");
                 else if (Math.abs(norm-average) < delta)
-                    audio.play("Tullio.wav");
+                    audio.play("pochi passi.wav");
 
             }
         }, 20, "checking-steps");
