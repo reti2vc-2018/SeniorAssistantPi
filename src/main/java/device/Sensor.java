@@ -7,7 +7,7 @@ import de.fh_zwickau.informatik.sensor.model.devices.DeviceList;
 import support.ZWaySimpleCallback;
 
 /**
- * Sensore che permette di registrare vari dati dell'ambiente
+ * Sensore che permette di registrare vari dati dell'ambiente (noi utilizziamo solo la luminosità)
  */
 public class Sensor {
 
@@ -35,7 +35,8 @@ public class Sensor {
      */
     private DeviceList allZWaveDevices;
     /**
-     * I device che vengono selezionati e filtrati dall'utente (ovvero quelli che verranno usati per prendere i dati)
+     * I device che vengono selezionati e filtrati dall'utente
+     * (ovvero quelli che verranno usati per prendere i dati)
      */
     private DeviceList devices;
 

@@ -21,12 +21,12 @@ public class Hue {
     private static final Logger LOG = LoggerFactory.getLogger("Hue");
 
     /**
-     * La luminopsita' massima a cui si puo' arrivare
+     * La luminosita' massima a cui si puo' arrivare
      */
     private static final int MAX_BRIGHTNESS = 254;
 
     /**
-     * Una mappa che ad ogni colore (in lingua ita) assegna il proprio valore in hue
+     * Una mappa che ad ogni colore (in italiano) assegna il proprio valore in hue
      */
     private static final Map<String, Double[]> COLORS = new HashMap<>();
 
@@ -45,7 +45,7 @@ public class Hue {
      */
     private final AtomicDouble brightness = new AtomicDouble(0);
 
-    // Riempimento della mappa con i vari colori
+    // Riempimento della mappa con i colori
     static {
         COLORS.put("giall[oae]", new Double[]{0.45, 0.45});
         COLORS.put("ross[oae]", new Double[]{0.7, 0.25});
@@ -60,7 +60,7 @@ public class Hue {
     }
 
     /**
-     * Cerca le luci Philips Hue a ll'indirizzo <a href="http://172.30.1.138/api/C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx/lights/">http://172.30.1.138/api/C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx/lights/</a>
+     * Cerca le luci Philips Hue all'indirizzo <a href="http://172.30.1.138/api/C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx/lights/">http://172.30.1.138/api/C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx/lights/</a>
      * @throws NullPointerException se non trova nessun bridge
      */
     public Hue () throws NullPointerException { this("172.30.1.138", "C0vPwqjJZo5Jt9Oe5HgO6sBFFMxgoR532IxFoGmx"); }
@@ -118,7 +118,7 @@ public class Hue {
     public void turnOff() { on(false); }
     
     /**
-     * Ritorna la liminosita' attuale delle luci controllate
+     * Ritorna la luminosita' attuale delle luci controllate
      * @return il valore e' compreso tra 0 e 100
      */
     public double getCurrentBrightness() { return brightness.doubleValue(); }
@@ -163,7 +163,7 @@ public class Hue {
     public void increaseBrightness() { increaseBrightness(25); }
 
     /**
-     * Dinuisce la luminosita' delle luci controllate della percentuale che viene passata
+     * Diminuisce la luminosita' delle luci controllate della percentuale che viene passata
      * @param percentage la percentuale di diminuzione della luminosita'
      */
     public void decreaseBrightness(int percentage) {
@@ -175,7 +175,7 @@ public class Hue {
     }
 
     /**
-     * Dinuisce la luminosita' delle luci controllate del 25%
+     * Diminuisce la luminosita' delle luci controllate del 25%
      */
     public void decreaseBrightness() { decreaseBrightness(25); }
 
@@ -192,7 +192,7 @@ public class Hue {
 
     /**
      * Invia una richiesta a tutte le luci hue con l'attributo selezionato ed il suo valore<br>
-     * Con esso invia anche una transition:20 in modo che sia piu fluido il cambiamento se si mette true al terzo parametro
+     * Con esso invia anche un valore di transizione in modo che sia piu fluido il cambiamento se si mette true al terzo parametro
      * @param attribute l'attributo da modificare
      * @param value il valore da inserire
      * @param transition se includere la transizione o meno

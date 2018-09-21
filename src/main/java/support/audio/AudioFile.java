@@ -27,7 +27,7 @@ public class AudioFile implements Audio {
     private AudioStream lastIn = null;
 
     /**
-     * Serve per crearsi una mapp di tutte le canzoni
+     * Serve per crearsi una mappa di tutte le canzoni
      */
     private final static Map<String, File> files = getAllFiles(PATH_AUDIO);
 

@@ -21,19 +21,19 @@ import static spark.Spark.post;
 public class DialogFlowWebHook {
 
     /**
-     * Un logger per vedere le cose piu' easy
+     * Un logger per ottenere messaggi sull'esecuzione del programma
      */
     private static final Logger LOG = LoggerFactory.getLogger("WebHook");
 
     /**
      * Stringa che viene usata se l'azione esiste ma lancia un qualche tipo di errore
      */
-    public static final String ACTION_ERROR = "Purtroppo chi mi ha programmato e' un pirla, non posso fare cio' che hai chiesto";
+    public static final String ACTION_ERROR = "L'azione non è eseguibile";
 
     /**
      * Errore che viene mostrato all'utente se l'azione inviata non corrisponde a nessuna di quelle inserite
      */
-    public static final String ERROR = "Non mi hanno imparato abbastanza per fare questo";
+    public static final String ERROR = "Non posso eseguire nessuna azione di questo tipo";
 
     /**
      * L'eventuale path successiva all'url dichiarato nel Webhook di Dialog-Flow
@@ -70,7 +70,7 @@ public class DialogFlowWebHook {
     /**
      * Aggiunge un'azione ad una specifica richiesta di Dialog-Flow
      * @param actionId il nome dell'azione che viene passata da Dialog-Flow
-     * @param action l'azione da fare (e' consigliato usare le espressioni lambda)
+     * @param action l'azione da fare
      */
 	public void addOnAction(String actionId, Action action) { this.actions.put(actionId, action); }
 
@@ -136,7 +136,7 @@ public class DialogFlowWebHook {
      */
     public interface Action {
         /**
-         * Fai l'azione desiderata.
+         * Fa l'azione desiderata.
          * Se ritorna una stringa allora il testo viene cambiato. Se ritorna null non cambia il testo
          *
          * @param params una mappa contenente tutti i parametri impostati da dialogflow

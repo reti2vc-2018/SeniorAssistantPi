@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 public class SeniorAssistant {
 
     /**
-     * Un Logger per capire meglio quali pezzi vengono eseguiti e quali no.
+     * Un Logger per seguire l'esecuzione del programma.
      */
     public static final Logger LOG = LoggerFactory.getLogger("SeniorAssistant");
 
@@ -93,7 +93,7 @@ public class SeniorAssistant {
     /**
      * Prende gli argomenti nel formato "^-(?&lt;name&gt;[a-zA-Z]+)(::)?(?&lt;argument&gt;.*)$" e li inserisce in una mappa.
      * Se l'argomento non e' nel formato giusto lo ignora.
-     * @param args un'array di stringhe contente i vari argomenti
+     * @param args un array di stringhe contenente i vari argomenti
      * @return una mappa con key il nome dell'argomento (la parte prima del :: e dopo il meno) e come valore il valore di esso (la parte dopo ::)
      */
     private static Map<String, String> getArgsMap(String[] args) {
@@ -110,7 +110,7 @@ public class SeniorAssistant {
     }
 
     /**
-     * Funzione creata per gli argomenti che vengono passati in modo da evitare millemila try and catch
+     * Funzione creata per gli argomenti che vengono passati in modo da evitare troppi try and catch
      * @param num la stringa da trasformare in numero
      * @return il numero trasformato, null se fallisce
      */

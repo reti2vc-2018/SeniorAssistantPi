@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Classe per vedere il dato del battito cardiaco
+ * Classe per vedere le informazioni sul battito cardiaco
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HeartRate extends FitbitData {

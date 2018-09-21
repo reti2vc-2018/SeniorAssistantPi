@@ -48,7 +48,7 @@ public class Steps extends FitbitData {
 
 	/**
 	 * Prendi i dati specifici dei passi
-	 * @return una lista contenente una mappa con delle ore e minuti ad un valore del
+	 * @return una lista contenente una mappa con delle ore e minuti ad un valore dei passi
 	 */
 	public List<Map<String, Object>> getStepsData() { return stepsData; }
 }

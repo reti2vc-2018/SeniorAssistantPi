@@ -18,7 +18,7 @@ import java.util.List;
 public class LocalDB implements Database {
 
     /**
-     * Il percorso di dove trovare il database, strutturato in: &lt;interfaccia&gt;:&lt;implementazione&gt;:&lt;percorso vero e proprio&gt;
+     * Il percorso dove trovare il database, strutturato in: &lt;interfaccia&gt;:&lt;implementazione&gt;:&lt;percorso vero e proprio&gt;
      */
     public static final String DB_LOCATION = "jdbc:sqlite:";
 
@@ -90,10 +90,6 @@ public class LocalDB implements Database {
     public List<HeartRate> getHeartDataOfLast(int days) {
         try {
             int dayToSubtract = 15;
-//            Calendar calendar = Calendar.getInstance();
-//            calendar.setTimeInMillis(System.currentTimeMillis());
-//            calendar.add(Calendar.DATE, -dayToSubtract);
-//            long time = calendar.getTimeInMillis();
             long time = System.currentTimeMillis() - (dayToSubtract * 24 * 60 * 1000); // meno 24 ore per 60 secondi per 100 millisec
 
             ResultSet result = conn.createStatement().executeQuery("SELECT * FROM heart WHERE day>='" + new Timestamp(time) + "'");

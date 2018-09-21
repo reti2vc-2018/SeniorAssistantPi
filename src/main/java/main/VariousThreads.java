@@ -37,7 +37,7 @@ public class VariousThreads {
     private final AtomicInteger cooldown = new AtomicInteger(0);
 
     /**
-     * La variabile per far partire della musica da Youtube
+     * La variabile per far partire della musica
      */
     private final Audio audio;
 
@@ -45,7 +45,7 @@ public class VariousThreads {
      * Costruttore
      */
     public VariousThreads() {
-        audio = new AudioFile(); // se si vuole solamente questo e non YT
+        audio = new AudioFile(); // se si vuole solamente far partire una traccia tra quelle fornite e non Youtube
         // audio = System.getProperty("os.name").startsWith("Windows")? new Musich():new AudioFile();
     }
 
@@ -131,10 +131,10 @@ public class VariousThreads {
     }
 
     /**
-     * Gestione delle luci in modo che cambiano la luminosita' in base ai dati ricevuti dal sensore<br>
+     * Gestione delle luci in modo che cambino la luminosita' in base ai dati ricevuti dal sensore<br>
      * Se l'utente pero' cambia il valore delle luci di sua volonta', il processo non modifichera' le luci per almeno un'ora.
      * @param lights le luci da controllare
-     * @param sensor i sensori da cui porendere i dati
+     * @param sensor i sensori da cui prendere i dati
      */
     public void startHueAutoBrightness(final Hue lights, final Sensor sensor) {
         final int minute = 1;
@@ -213,7 +213,7 @@ public class VariousThreads {
 
     /**
      * Controlla che ad una certa ora si siano fatti abbastanza passi, ed in caso contrario avvisa tramite un messaggio vocale.<br>
-     * E' possibile trasformarlo in controlla ogni X se si sono fatti dei movimenti o meno.
+     *
      * @param database da dove vediamo se si sono fatti abbastanza passi
      */
     public void startCheckSteps(final Database database) {
@@ -252,7 +252,7 @@ public class VariousThreads {
      * ovvero se sono minori del minimo esso diventera' il minimo, stessa cosa con il massimo.
      * @param hour l'ora corrente (valore da 0 a 23)
      * @param minutes i minuti correnti (valore da 0 a 59)
-     * @param sensorBright la liminosita' segnata dal sensore (valore da 0 a 100)
+     * @param sensorBright la luminosita' segnata dal sensore (valore da 0 a 100)
      * @param minBrightness la luminosita' minima che si vuole avere (valore da 0 a 100)
      * @return un valore indicante quanta luminosita' si ha bisogno nell'ora indicata e con la luminosita' indicata
      */
@@ -273,7 +273,7 @@ public class VariousThreads {
     }
 
     /**
-     * Restuisce un thread che se fatto partire, esegue il runnable in un sub-thread alll'ora indicata ogni giorno<br>
+     * Restuisce un thread che se fatto partire, esegue il runnable in un sub-thread all'ora indicata ogni giorno<br>
      * Il sotto thread lanciato avra' lo stesso nome, ma con un trattino e la data di lancio a seguito<br>
      * Se il thread viene interrotto non fa piu' partire il runnable e si ferma
      * @param runnable il runnable da lanciare

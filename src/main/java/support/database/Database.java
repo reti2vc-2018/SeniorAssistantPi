@@ -31,7 +31,7 @@ public interface Database {
      * Inserisce nuovi dati del paziente nel database.
      * @param dateMilliSec la data che si vuole inserire in millisec
      * @param heartRate il battito cardiaco
-     * @return vero se ha inserito o i dati esistevano gia' falso se non ce l'ha fatta
+     * @return vero se ha inserito o i dati esistevano gia', falso se non ce l'ha fatta
      */
     boolean updateHeart(long dateMilliSec, double heartRate);
     /**
@@ -64,9 +64,9 @@ public interface Database {
     List<Steps> getStepDataOfLast(int days);
 
     /**
-     * Prendi il Thread che automaticamente gestisce l'inserimento dei dati orari (per ora solo il battito cardiaco)<br>
+     * Prende il Thread che automaticamente gestisce l'inserimento dei dati orari (per ora solo il battito cardiaco)<br>
      * Se per caso c'e' un fallimento riprova ad inserire i dati ogni x minuti, indicati dal terzo parametro<br>
-     * @param database il database in cui inserirlo
+     * @param database il database in cui inserire i dati
      * @param fitbit la classe che contiene i dati aggiornati
      * @param retryMinutes ogni quanti minuti deve riprovare ad inviare la richiesta
      * @return un Thread
@@ -99,7 +99,7 @@ public interface Database {
     /**
      * Prendi il Thread che automaticamente gestisce l'inserimento dei dati giornalieri, esso fara' i tentativi alle 23<br>
      * Se per caso c'e' un fallimento riprova ad inserire i dati ogni x minuti, indicati dal terzo parametro<br>
-     * @param database il database in cui inserirlo
+     * @param database il database in cui inserire i dati
      * @param fitbit la classe che contiene i dati aggiornati
      * @param retryMinutes ogni quanti minuti deve riprovare ad inviare la richiesta
      * @return un Thread da far partire

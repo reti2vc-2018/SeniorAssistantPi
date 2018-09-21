@@ -212,5 +212,4 @@ public class Fitbit {
 		return String.format("%02d:%02d", hour, minu);
 	}
 
-	// Device dev = auth.run(BASIC_URL + "devices.json", Device.class);
 }

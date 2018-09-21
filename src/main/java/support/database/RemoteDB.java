@@ -29,12 +29,12 @@ public class RemoteDB implements Database {
      */
     public final String base_url;
     /**
-     * L'username del nostro vecchio
+     * L'username dell'utente
      */
     public final String username;
 
     /**
-     * Inseredolo username e basta l'indirizzo a cui tentera' la connesione e' <a href="http://127.0.0.1:5000/api/">http://127.0.0.1:5000/api/</a>
+     * Inseredo lo username e basta l'indirizzo a cui tentera' la connesione e' <a href="http://127.0.0.1:5000/api/">http://127.0.0.1:5000/api/</a>
      * @param username il nome utente assiociato per aggiornare i dati
      */
     public RemoteDB(String username) {
@@ -42,7 +42,7 @@ public class RemoteDB implements Database {
     }
 
     /**
-     * Costruttore che ha bisogno sia delo username che del url dper la connesione
+     * Costruttore che ha bisogno sia dello username che dell'url per la connesione
      * @param username il nome utente assiociato per aggiornare i dati
      * @param base_url l'url a cui si punta per aggiornare/leggere i dati
      */

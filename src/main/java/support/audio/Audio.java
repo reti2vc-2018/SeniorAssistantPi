@@ -6,7 +6,7 @@ package support.audio;
 public interface Audio {
 
     /**
-     * Fa partire una audio in base al nome di essa.<br>
+     * Fa partire una traccia audio in base al nome di essa.<br>
      * Se un audio era gia' stato fatto partire esso viene fermato<br>
      * Il nome puo' variare in base all'implementazione: nome di file o nome da cercare su internet...
      * @param name la stringa per far partire la canzone
@@ -22,7 +22,7 @@ public interface Audio {
     void playRandom(String name);
 
     /**
-     * Ferma l'ultimo che e' stato fatto partire
+     * Ferma l'ultimo audio che e' stato fatto partire
      */
     void stop();
 }

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Classe per i dati del sonno dell'utente
+ * Classe per recuperare i dati del sonno dell'utente
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Sleep {

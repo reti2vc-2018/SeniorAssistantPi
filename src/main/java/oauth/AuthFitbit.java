@@ -24,7 +24,7 @@ import java.util.Arrays;
 public class AuthFitbit {
 
     /**
-     * Un logger per rendere le cose semplici in caso di casini
+     * Un logger per rendere più semplice il debug
      */
     private static final Logger LOG = LoggerFactory.getLogger("Fitbit Auth");
 
@@ -43,7 +43,7 @@ public class AuthFitbit {
     private static final java.io.File DATA_STORE_DIR = new java.io.File(System.getProperty("user.home"), ".store/seniorAssistant");
 
     /**
-     * OAuth 2 scope.<br>
+     * OAuth2 scope.<br>
      * Nel nostro caso sono le varie categorie dove si trovano le informazioni di cui abbiamo bisogno
      */
     private static final String SCOPE[] = new String[]{"activity","heartrate","sleep","settings"};

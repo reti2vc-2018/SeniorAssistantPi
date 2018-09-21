@@ -26,7 +26,6 @@ public class Musich implements Audio {
     private static final String API_URL = "https://www.googleapis.com/youtube/v3/search?";
     /**
      * La key necessaria per prendere i dati da youtube<br>
-     * Tra l'altro l'ho presa a caso... quindi boh.
      */
     private static final String KEY = "AIzaSyAYcQcX9P5btBTfgdwWwETNh_7jV20cQp0";
 
@@ -44,11 +43,9 @@ public class Musich implements Audio {
      */
     public Musich() {
         /*
-        * Viene mandato questo errore in console, pero' boh... solo ogni tanto:
+        * Viene mandato questo errore in console:
         * Exception "java.lang.ClassNotFoundException: com/intellij/codeInsight/editorActions/FoldingData"while constructing DataFlavor for: application/x-java-jvm-local-objectref; class=com.intellij.codeInsight.editorActions.FoldingData
-        * A volte ne tira tante, a volte nessuna.
         * Sta' di fatto che per quanto ne so non compromette il funzionamento.
-        * Al massimo usare un logger che dice di ignorare questo errore nel log
          */
         NativeInterface.initialize();
         NativeInterface.open();
@@ -56,7 +53,7 @@ public class Musich implements Audio {
     }
 
     /**
-     * Serve ad avere una lista di id dei video che corrispondono alle keyword indicate nella ricerca
+     * Serve ad avere una lista di id dei video che corrispondono alle keywords indicate nella ricerca
      * @param search la ricerca da fare su youtube
      * @param maxResult quanti risultati si vuole avere
      * @return una lista di id dei video che corrispondono alla ricerca
@@ -87,7 +84,7 @@ public class Musich implements Audio {
     }
 
     /**
-     * Serve ad avere una lista di id dei video che corrispondono alle keyword indicate nella ricerca<br>
+     * Serve ad avere una lista di id dei video che corrispondono alle keywords indicate nella ricerca<br>
      * La lista conterra' i primi 5 id  dei video trovati.
      * @param search la ricerca da fare su youtube
      * @return una lista di id dei video che corrispondono alla ricerca
@@ -97,8 +94,8 @@ public class Musich implements Audio {
     }
 
     /**
-     * Dato l'id di un video viene fatta partire un frame contenente il video richiesto<br>
-     * Come al solito, youtube potrebbe far partire una pubblicita'... eh beh.
+     * Dato l'id di un video viene fatto partire un frame contenente il video richiesto<br>
+     * Come al solito, youtube potrebbe far partire una pubblicita'.
      * @param videoId l'id del video da far vedere
      * @param seconds da quanti secondi bisogna far partire il video
      */
@@ -127,8 +124,8 @@ public class Musich implements Audio {
     }
 
     /**
-     * Dato l'id di un video viene fatta partire un frame contenente il video richiesto<br>
-     * Come al solito, youtube potrebbe far partire una pubblicita'... eh beh.
+     * Dato l'id di un video viene fatto partire un frame contenente il video richiesto<br>
+     * Come al solito, youtube potrebbe far partire una pubblicita'.
      * @param videoId l'id del video da far vedere
      */
     public void play(final String videoId) {
@@ -136,8 +133,8 @@ public class Musich implements Audio {
     }
 
     /**
-     * Serve a far partire un video a caso tra quelli che corrispondono alle keyword indicate nella ricerca<br>
-     * Come al solito, youtube potrebbe far partire una pubblicita'... eh beh.
+     * Serve a far partire un video a caso tra quelli che corrispondono alle keywords indicate nella ricerca<br>
+     * Come al solito, youtube potrebbe far partire una pubblicita'.
      * @param search la ricerca da fare su youtube
      * @param maxResult fra quanti risultati deve scegliere
      */
@@ -146,9 +143,9 @@ public class Musich implements Audio {
     }
 
     /**
-     * Serve a far partire un video a caso tra quelli che corrispondono alle keyword indicate nella ricerca<br>
+     * Serve a far partire un video a caso tra quelli che corrispondono alle keywords indicate nella ricerca<br>
      * Esso scegliera' fra i primi 5 risultati<br>
-     * Come al solito, youtube potrebbe far partire una pubblicita'... eh beh.
+     * Come al solito, youtube potrebbe far partire una pubblicita'.
      * @param search la ricerca da fare su youtube
      */
     public void playRandom(String search) {
@@ -158,7 +155,7 @@ public class Musich implements Audio {
 
     /**
      * Ferma il video che e' in riprduzione in questo momento.<br>
-     * Se non ce ne sono, amen... non fa nulla.
+     * Se non ce ne sono non fa nulla.
      */
     public void stop() {
         if(currentThread != null) {
