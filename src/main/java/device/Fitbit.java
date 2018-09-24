@@ -147,9 +147,9 @@ public class Fitbit {
 	 * 
 	 * @return un intero rappresentante le ore passate a dormire
 	 */
-	public synchronized long getHoursSleep() {
+	public synchronized double getHoursSleep() {
 		sleep = update(Sleep.class, sleep,"1.2" + USER + "sleep/date/today.json");
-		return sleep.getMinutesAsleep()/60;
+		return (double)sleep.getMinutesAsleep()/60;
 	}
 
 	/**

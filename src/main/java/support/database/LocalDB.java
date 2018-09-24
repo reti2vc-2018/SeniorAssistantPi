@@ -20,7 +20,7 @@ public class LocalDB implements Database {
     /**
      * Il percorso dove trovare il database, strutturato in: &lt;interfaccia&gt;:&lt;implementazione&gt;:&lt;percorso vero e proprio&gt;
      */
-    public static final String DB_LOCATION = "jdbc:sqlite:";
+    public static final String DB_LOCATION = "jdbc:sqlite:src/main/resources/";
 
     /**
      * Il nome del database (aka il nome del file)

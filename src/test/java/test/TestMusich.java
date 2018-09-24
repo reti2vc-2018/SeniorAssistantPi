@@ -21,7 +21,7 @@ public class TestMusich {
     @Test
     public void test2() {
         AudioFile audio = new AudioFile();
-        audio.play("Godzilla.wav"); // apparently it doesn't like some wav
+        audio.play("Godzilla.wav");
         waitAndPrint(3);
         audio.play("Tullio.wav");
         waitAndPrint(10);
@@ -45,6 +45,18 @@ public class TestMusich {
         audio.stop();
         audio2.stop();
     }
+
+    @Test
+    public void test4() {
+        AudioFile audio = new AudioFile();
+
+        new AudioFile("pochi passi.wav");
+        waitAndPrint(3);
+        audio.play("molti battiti.wav");
+        waitAndPrint(3);
+        audio.stop();
+    }
+
 
     public void waitAndPrint(Integer seconds) {
         if(seconds != null) synchronized (seconds) {

@@ -8,7 +8,6 @@ import device.fitbitdata.HeartRate;
 import device.fitbitdata.Steps;
 import support.audio.Audio;
 import support.audio.AudioFile;
-import support.audio.Musich;
 import support.database.Database;
 
 import java.sql.Timestamp;
@@ -102,8 +101,8 @@ public class VariousThreads {
             return String.format("Oggi hai percorso circa %.2f kilometri", steps/2000);
         });
         df.addOnAction("ReqSleep", (params) -> {
-            long sleep = fitbit.getHoursSleep();
-            return String.format("Oggi hai dormito per %.2f ore", (double)sleep/3600000);
+            double sleep = fitbit.getHoursSleep();
+            return String.format("Oggi hai dormito per %.2f ore", sleep);
         });
 
         df.startServer();
@@ -172,7 +171,6 @@ public class VariousThreads {
     public void startHueControlledByHeartBeat(final Hue lights, final Fitbit fitbit, final Database database) {
         final int minutes = 30;
         final int delta = 15;
-        final Audio audio = new AudioFile();
         Thread thread = getThreadStartingEach(new Runnable() {
             @Override
             public synchronized void run() {
@@ -198,11 +196,11 @@ public class VariousThreads {
                 if (Math.abs(rateNow-average) > delta ) { // ALTO
                     lights.decreaseBrightness();
                     audio.playRandom("relax");
-                    new AudioFile().play("molti battiti.wav");
+                    new AudioFile("molti battiti.wav");
                 }
                 else if (Math.abs(rateNow-average) < delta) { // BASSO avvisa ma niente musica
                     lights.increaseBrightness();
-                    audio.play("pochi battiti.wav");
+                    new AudioFile("pochi battiti.wav");
                 }
             }
         }, minutes, "lights-with-heartbeat");
@@ -219,7 +217,6 @@ public class VariousThreads {
     public void startCheckSteps(final Database database) {
         final int norm = 4500;
         final int delta = 1500; // average steps for 60 year old -> 3.500-5.500 or so they say
-        final Audio audio = new AudioFile();
 
         Thread thread = getThreadStartingAt(new Runnable() {
             @Override
@@ -233,9 +230,9 @@ public class VariousThreads {
                 final long average = size!=0? (long)(sum/size):0;
 
                 if (Math.abs(norm-average) > delta )
-                    audio.play("molti passi.wav");
+                    new AudioFile("molti passi.wav");
                 else if (Math.abs(norm-average) < delta)
-                    audio.play("pochi passi.wav");
+                    new AudioFile("pochi passi.wav");
 
             }
         }, 20, "checking-steps");

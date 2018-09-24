@@ -16,13 +16,13 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Sleep {
 
-    private long minutesAsleep;
+    private int minutesAsleep;
 
     private List<SleepData> datas;
 
     @JsonProperty("summary")
     private void setMinutesAsleep(Map<String, Object> map) {
-        minutesAsleep = (long) map.get("totalMinutesAsleep");
+        minutesAsleep = (int) map.get("totalMinutesAsleep");
     }
 
     @JsonProperty("sleep")

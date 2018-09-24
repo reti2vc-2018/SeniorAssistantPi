@@ -70,6 +70,8 @@ public class SeniorAssistant {
 
                 LOG.info("Connessione al database...");
                 Database database = remoteDbUser == null ? new LocalDB() : new RemoteDB(remoteDbUser);
+                if(remoteDbUser != null && !database.isReachable())
+                    database = new LocalDB();
 
                 threads.startInsertData(database, fitbit);
                 threads.startHueControlledByHeartBeat(lights, fitbit, database);

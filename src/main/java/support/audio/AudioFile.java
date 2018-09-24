@@ -1,11 +1,10 @@
 package support.audio;
 
-import sun.audio.AudioPlayer;
-import sun.audio.AudioStream;
-
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +23,7 @@ public class AudioFile implements Audio {
     /**
      * L'ultimo audio fatto partire
      */
-    private AudioStream lastIn = null;
+    private final Clip clip;
 
     /**
      * Serve per crearsi una mappa di tutte le canzoni
@@ -37,6 +36,28 @@ public class AudioFile implements Audio {
     private final static Map<String, List<File>> dirs = getAllDirs(PATH_AUDIO);
 
     /**
+     * Crea un oggetto audio che si puo' poi far riprodurre e stoppare
+     */
+    public AudioFile() {
+        Clip clip = null;
+        try {
+            clip = AudioSystem.getClip();
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+        this.clip = clip;
+    }
+
+    /**
+     * Utilizzando questo costruttore si fa partire in automatico il file scelto
+     * @param file il nome del file scelto da far partire subito
+     */
+    public AudioFile(String file) {
+        this();
+        this.play(file);
+    }
+
+    /**
      * Fa partire una canzone che si trova nella cartella audio o in una delle sue sottocartelle
      * @param name la stringa per far partire la canzone
      */
@@ -45,10 +66,10 @@ public class AudioFile implements Audio {
         stop();
         try {
             File file = files.get(name);
-            lastIn = new AudioStream( new FileInputStream(file));
-            AudioPlayer.player.start(lastIn);
-
-        } catch (IOException e) {
+            AudioInputStream audioIn = AudioSystem.getAudioInputStream(file);
+            clip.open(audioIn);
+            clip.start();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -66,12 +87,11 @@ public class AudioFile implements Audio {
     @Override
     public void stop() {
         try {
-            AudioPlayer.player.stop(lastIn);
-            lastIn.close();
-            lastIn = null;
-        } catch (IOException e) {
+            clip.stop();
+            clip.close();
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (NullPointerException e) {}
+        }
     }
 
     /**
